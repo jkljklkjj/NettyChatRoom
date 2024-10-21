@@ -1,0 +1,35 @@
+server:
+  port: 8088
+spring:
+  datasource:
+    url: jdbc:mysql://39.104.61.4:3306/user
+    username: root
+    password: "@Aa123456"
+    hikari:
+      minimum-idle: 5
+      maximum-pool-size: 10
+      connection-timeout: 30000
+      idle-timeout: 600000
+  data:
+    redis:
+      host: 39.104.61.4
+      port: 6379
+      database: 2
+      jedis:
+        pool:
+          max-active: 8
+          max-wait: 1
+          max-idle: 8
+          min-idle: 2
+    mongodb:
+      uri: mongodb://39.104.61.4:27017/test?minPoolSize=0&maxPoolSize=100&maxIdleTimeMS=60000&waitQueueMultiple=5&waitQueueTimeoutMS=120000
+logging:
+  level:
+    org:
+      springframework: Error
+      apache:
+        ibatis: DEBUG
+      mybatis: DEBUG
+    com:
+      example:
+        mapper: debug
