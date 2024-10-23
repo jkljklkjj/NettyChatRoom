@@ -42,7 +42,7 @@ public class GroupService {
      * @param id 群聊的ID
      * @return 群聊的信息
      */
-    public Group delGroup(int id) {
+    public int delGroup(int id) {
         return groupMapper.delGroup(id);
     }
 }

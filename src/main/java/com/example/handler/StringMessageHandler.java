@@ -9,6 +9,7 @@ import com.example.handler.MessageHandlerImpl.MessageHandlerFactory;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.util.AttributeKey;
+import io.netty.util.ReferenceCountUtil;
 
 public class StringMessageHandler extends SimpleChannelInboundHandler<String> {
     private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(StringMessageHandler.class);
@@ -38,9 +39,14 @@ public class StringMessageHandler extends SimpleChannelInboundHandler<String> {
             JSONObject jsonMsg = JSONObject.parseObject(msg);
             String type = jsonMsg.getString("type");
             MessageHandler handler = MessageHandlerFactory.create(type);
-            handler.handle(jsonMsg, ctx);
+            if (handler != null) {
+                handler.handle(jsonMsg, ctx);
+            }
         } catch (Exception e) {
             System.out.println("接收到的消息不是有效的 JSON 格式");
+            ctx.fireChannelRead(msg);
+        } finally {
+            ReferenceCountUtil.release(msg);
         }
     }
 

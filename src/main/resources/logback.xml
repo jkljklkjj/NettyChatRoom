@@ -10,4 +10,6 @@
     <root level="debug">
         <appender-ref ref="FILE" />
     </root>
+
+    <logger name="org.mongodb.driver" level="WARN"/>
 </configuration>

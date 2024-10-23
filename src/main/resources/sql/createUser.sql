@@ -12,4 +12,4 @@ CREATE TABLE IF NOT EXISTS users (
 ) COMMENT '用户基本信息表';
 
 Insert into users (username, password, email, phone) values
-('admin', '123456', '2998568539@qq.com','13729047853')
+('admin', '123456', '2998568539@qq.com','13729047853');

@@ -25,6 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class UserTest {
 
     private MockMvc mockMvc;
+    private String token;
 
     @Mock
     private UserService userService;
@@ -65,8 +66,6 @@ public class UserTest {
         int id = 1;
         String password = "123456";
 
-        System.out.println("Hello world from testLoginUser!");
-
         when(userService.authenticateUser(id, password)).thenReturn(true);
 
         MvcResult result = mockMvc.perform(get("/user/login")
@@ -75,7 +74,7 @@ public class UserTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        String responseContenet = result.getResponse().getContentAsString();
-        System.out.println(responseContenet);
+        token = result.getResponse().getContentAsString();
+        System.out.println(token);
     }
 }

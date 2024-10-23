@@ -9,7 +9,12 @@ import io.netty.channel.ChannelHandlerContext;
 public class LoginHandler implements MessageHandler {
     @Override
     public void handle(JSONObject jsonMsg, ChannelHandlerContext ctx) {
-        String clientId = jsonMsg.getString("clientId");
+        /*
+         * 要求信息：
+         * clientId: 通过token和redis获取的客户端的ID
+         * token需要通过header获取
+         */
+        String clientId = jsonMsg.getString("UserId");
         StringMessageHandler.add(clientId, ctx);
     }
     

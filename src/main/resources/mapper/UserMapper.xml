@@ -2,8 +2,25 @@
 <!DOCTYPE mapper
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.example.UserMapper">
-    <select id="selectUser" resultType="com.example.User">
+<mapper namespace="com.example.mapper.UserMapper">
+<!--    函数名，返回值类型，参数类型-->
+    <select id="selectUser" resultType="com.example.model.mysql.User">
         SELECT * FROM users WHERE id = #{id}
+    </select>
+
+    <select id="selectUserByName" resultType="com.example.model.mysql.User">
+        SELECT * FROM users WHERE username = #{name}
+    </select>
+
+    <insert id="insertUser" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        INSERT INTO users(username, password, email, phone)
+        VALUES(#{username}, #{password}, #{email}, #{phone})
+    </insert>
+
+    <select id="selectFriends" resultType="com.example.model.mysql.User">
+        SELECT id,username FROM users WHERE id IN
+            <foreach item="id" collection="idList" open="(" separator="," close=")">
+                #{id}
+            </foreach>
     </select>
 </mapper>

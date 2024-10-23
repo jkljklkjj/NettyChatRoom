@@ -2,57 +2,59 @@ package com.example.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.LogoutConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.DefaultSecurityFilterChain;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.http.HttpMethod;
 
 import com.example.filter.JwtRequestFilter;
+import com.example.util.JwtService;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+    private JwtService jwtService;
 
-    private final JwtRequestFilter jwtRequestFilter;
-
-    public SecurityConfig(@Lazy JwtRequestFilter jwtRequestFilter) {
-        this.jwtRequestFilter = jwtRequestFilter;
+    SecurityConfig(JwtService jwtService) {
+        this.jwtService = jwtService;
     }
 
     @Bean
-    public DefaultSecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        // 这个函数只是用于基本的配置
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            // 禁用 CSRF（Cross-site request forgery）跨站请求伪造
             .csrf(AbstractHttpConfigurer::disable)
-            // 授权请求，/public/** 下的请求不需要验证
-            .authorizeHttpRequests(authorize -> authorize
-                .requestMatchers("/public/**").permitAll()
-                .requestMatchers("/user/login").permitAll()
-                .requestMatchers("/user/register").permitAll()
-                .anyRequest().authenticated()
+            .authorizeHttpRequests(authorizeRequests -> {
+                authorizeRequests
+                    .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                    .requestMatchers(HttpMethod.POST, "user/login").permitAll()
+                    .requestMatchers(HttpMethod.POST, "user/register").permitAll()
+                    .requestMatchers("/error").permitAll()
+                    .anyRequest().authenticated();
+            })
+            .sessionManagement(sessionManagement ->
+                sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
-            // 禁用 session
-            .sessionManagement(session -> session
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            )
-            // 添加 JWT 过滤器，这个类需要自己定义
-            .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
-            // 禁用表单登录
-            .formLogin(AbstractHttpConfigurer::disable)
-            // 配置登出，/logout 不需要验证
-            .logout(LogoutConfigurer::permitAll);
+            .addFilterBefore(new JwtRequestFilter(jwtService), UsernamePasswordAuthenticationFilter.class);
+
         return http.build();
     }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    public void configure(WebSecurity web) throws Exception {
+        web.ignoring()
+                .requestMatchers("/swagger-ui.html")
+                .requestMatchers("/v2/**")
+                .requestMatchers("/swagger-resources/**");
     }
 }

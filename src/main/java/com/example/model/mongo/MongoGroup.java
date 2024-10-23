@@ -3,6 +3,7 @@ package com.example.model.mongo;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.index.Indexed;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -11,24 +12,25 @@ import java.util.ArrayList;
 public class MongoGroup {
     @Id
     private ObjectId id;
-    private final int groupid;
+    @Indexed(unique = true)
+    private final int groupId;
     private int admin;
     private List<Integer> members;
 
     public MongoGroup() {
-        groupid = -1;
+        groupId = -1;
         admin = -1;
         members = new ArrayList<>();
     }
 
-    public MongoGroup(int groupid, int admin) {
-        this.groupid = groupid;
+    public MongoGroup(int groupId, int admin) {
+        this.groupId = groupId;
         this.admin = admin;
         members = new ArrayList<>();
     }
 
-    public MongoGroup(int groupid){
-        this.groupid = groupid;
+    public MongoGroup(int groupId){
+        this.groupId = groupId;
         admin = -1;
         members = new ArrayList<>();
     }
@@ -41,8 +43,8 @@ public class MongoGroup {
         this.id = id;
     }
 
-    public int getGroupid() {
-        return groupid;
+    public int getGroupId() {
+        return groupId;
     }
 
     public int getAdmin() {
@@ -68,15 +70,15 @@ public class MongoGroup {
         return members.add(memberId);
     }
 
-    public boolean removeMember(ObjectId memberId) {
-        return members.remove(memberId);
+    public boolean removeMember(int memberId) {
+        return members.remove(Integer.valueOf(memberId));
     }
 
     @Override
     public String toString() {
         return "MongoGroup{" +
                 "id=" + id +
-                ", groupid=" + groupid +
+                ", groupid=" + groupId +
                 '}';
     }
 }

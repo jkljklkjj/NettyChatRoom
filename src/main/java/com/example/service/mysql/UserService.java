@@ -14,7 +14,7 @@ import com.example.util.JwtUtil;
 
 @Service
 public class UserService {
-    private UserMapper userMapper;
+    private final UserMapper userMapper;
     private final String REDIS_KEY_PREFIX = "user:";
     private final RedisService jedis;
     private final JwtUtil jwtUtil;
@@ -28,9 +28,10 @@ public class UserService {
     public int register(User user) {
         System.out.println("有顾客正在注册");
         System.out.println(user.getUsername());
-        if (userMapper.selectUserByName(user.getUsername()) != null) {
-            return -1;
-        }
+//        if (userMapper.selectUserByName(user.getUsername()) != null) {
+//            System.out.println("用户已存在");
+//            return -1;
+//        }
         return userMapper.insertUser(user);
     }
 
@@ -40,7 +41,7 @@ public class UserService {
         if (res) {
             String ipAddress = request.getRemoteAddr();
             jedis.set("user:" + id + "ip", ipAddress);
-            String result = (String) jedis.get("user:" + id);
+            String result = (String) jedis.get("user:" + id+ "ip");
             System.out.println("用户" + id + "登录成功，IP地址为：" + result);
             // 生成token
             String token = jwtUtil.generateToken(String.valueOf(id));

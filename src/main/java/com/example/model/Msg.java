@@ -3,7 +3,7 @@ package com.example.model;
 public class Msg {
     private String type;
     private String targetClientId;
-    private String content;
+    private final String content;
 
     public Msg(String type, String targetClientId, String content) {
         this.type = type;

@@ -14,11 +14,17 @@ public class ChatHandler implements MessageHandler {
     private static final Logger logger = org.slf4j.LoggerFactory.getLogger(ChatHandler.class);
     @Override
     public void handle(JSONObject jsonMsg, ChannelHandlerContext ctx) {
+        /*
+         * 要求信息：
+         * targetClientId: 目标客户端的ID
+         * content: 聊天内容
+         */
         String targetClientId = jsonMsg.getString("targetClientId");
         String content = jsonMsg.getString("content");
+        String UserId = jsonMsg.getString("UserId");
         ChannelHandlerContext targetChannel = StringMessageHandler.get(targetClientId);
         if (targetChannel != null) {
-            System.out.println("发送给客户端 " + targetClientId + " 的消息：" + content);
+            System.out.println("发送给客户端 " + targetClientId + " 的消息：" + content+" from "+UserId);
             ChannelFuture future = targetChannel.writeAndFlush(Unpooled.copiedBuffer(content.getBytes()));
             future.addListener(f -> {
                 if (f.isSuccess()) {

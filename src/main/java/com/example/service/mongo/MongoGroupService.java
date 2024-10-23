@@ -19,7 +19,7 @@ public class MongoGroupService {
      * @return 是否注册成功
      */
     public boolean register(MongoGroup group) {
-        if (mongoGroupRepository.findByGroupid(group.getGroupid()) != null) {
+        if (mongoGroupRepository.findByGroupId(group.getGroupId()) != null) {
             return false;
         }
         mongoGroupRepository.save(group);
@@ -33,7 +33,7 @@ public class MongoGroupService {
      * @return 是否成功
      */
     public boolean addMember(int groupId, int memberId) {
-        MongoGroup group = mongoGroupRepository.findByGroupid(groupId);
+        MongoGroup group = mongoGroupRepository.findByGroupId(groupId);
         if (group == null) {
             return false;
         }
@@ -46,20 +46,20 @@ public class MongoGroupService {
      * @param memberId 成员的MongoDB的ID
      * @return 是否成功
      */
-    public boolean removeMember(int groupId, ObjectId memberId) {
-        MongoGroup group = mongoGroupRepository.findByGroupid(groupId);
+    public boolean removeMember(int groupId, int memberId) {
+        MongoGroup group = mongoGroupRepository.findByGroupId(groupId);
         if (group == null) {
             return false;
         }
         return group.removeMember(memberId);
     }
 
-    public MongoGroup getGroup(int groupid) {
-        return mongoGroupRepository.findByGroupid(groupid);
+    public MongoGroup getGroup(int groupId) {
+        return mongoGroupRepository.findByGroupId(groupId);
     }
 
-    public boolean delGroup(int groupid){
-        MongoGroup group = mongoGroupRepository.findByGroupid(groupid);
+    public boolean delGroup(int groupId){
+        MongoGroup group = mongoGroupRepository.findByGroupId(groupId);
         if (group == null) {
             return false;
         }

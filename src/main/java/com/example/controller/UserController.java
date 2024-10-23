@@ -1,8 +1,10 @@
 package com.example.controller;
 
-import java.util.List;
-
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,6 +27,7 @@ import jakarta.servlet.http.HttpServletRequest;
  * 用户相关接口
  * 提供了登录注册，添加好友和群组，获取用户信息等接口
  */
+@Api(tags = "用户管理")
 @RestController
 @RequestMapping("/user")
 public class UserController {
@@ -46,8 +49,9 @@ public class UserController {
      * @param id 用户在Mysql自动生成的id
      * @return 用户的映射
      */
-    @GetMapping("/{id}")
-    public User getUserById(@PathVariable(name = "id", required = true) int id) {
+    @ApiOperation(value = "获取用户信息")
+    @PostMapping("/get")
+    public User getUserById(@RequestAttribute("UserId") int id) {
         return userService.getUserById(id);
     }
 
@@ -56,6 +60,7 @@ public class UserController {
      * @param id 用户在Mysql自动生成的id
      * @return 用户的映射
      */
+    @ApiOperation(value = "获取Mongo用户信息")
     @GetMapping("/mongo/{id}")
     public MongoUser getMongoUserByUserId(@PathVariable(name = "id", required = true) int id) {
         return mongoUserService.getUserByUserId(id);
@@ -67,8 +72,10 @@ public class UserController {
      * @param password 密码
      * @return 是否登录成功
      */
+    @ApiOperation(value = "登录")
     @PostMapping("/login")
-    public String login(@RequestParam int id, @RequestParam String password,HttpServletRequest request) {
+    public String login(@ApiParam("用户账号") @RequestParam int id, @ApiParam("密码") @RequestParam String password,HttpServletRequest request) {
+        System.out.println("用户"+id+"登录中...");
         return userService.login(id, password,request);
     }
 
@@ -77,9 +84,9 @@ public class UserController {
         return jwtUtil.validateToken(token, jwtUtil.extractClaims(token).getSubject());
     }
     
-
+    @ApiOperation(value = "退出登录")
     @PostMapping("/logout")
-    public boolean logout(@RequestParam int id){
+    public boolean logout(@RequestAttribute("UserId") int id){
         jedis.del("user:"+id);
         System.out.println("用户"+id+"已退出登录");
         return true;
@@ -90,60 +97,31 @@ public class UserController {
      * @param user 用户信息
      * @return 是否注册成功
      */
+    @ApiOperation(value = "注册")
+    @Transactional(rollbackFor = Exception.class)
     @PostMapping("/register")
-    public int register(@RequestBody User user) {
+    public int register(@ApiParam("用户信息") @RequestBody User user) {
         System.out.println("用户注册中...");
         userService.register(user);
         int id = user.getId();
         MongoUser mongoUser = new MongoUser(id, null, null);
         System.out.println(id+"用户注册成功！");
         if(!mongoUserService.register(mongoUser)){
-            return -1;
+            throw new RuntimeException("MongoDB register failed");
         }
         return id;
     }
 
     /**
-     * 添加好友
-     * @param id 用户 ID
-     * @param friendId 好友 ID
-     * @return 是否添加成功
-     */
-    @PostMapping("/addfriend")
-    public boolean addFriend(@RequestAttribute("UserId") int id, @RequestParam(name = "friendId", required = true) int friendId) {
-        return mongoUserService.addFriend(id, friendId);
-    }
-
-    /**
-     * 删除好友
-     * @param id 用户 ID
-     * @param friendid 好友 ID
-     * @return 是否删除成功
-     */
-    @PostMapping("/delfriend")
-    public boolean delFriend(@RequestAttribute("UserId") int id,@PathVariable(name = "id", required = true) int friendid) {
-        return mongoUserService.delFriend(id, friendid);
-    }
-
-    /**
-     * 获取好友列表
-     * @param id 用户 ID
-     * @return 好友列表
-     */
-    @PostMapping("/getfriend")
-    public List<Integer> getfriend(@RequestAttribute("UserId") int id) {
-        return mongoUserService.getFriends(id);
-    }
-
-    /**
      * 添加群组
      * @param id 用户 ID
-     * @param groupid 群组 ID
+     * @param groupId 群组 ID
      * @return 是否添加成功
      */
+    @ApiOperation(value = "添加群组")
     @PostMapping("/addgroup")
-    public boolean addGroup(@RequestAttribute("UserId") int id, @RequestParam int groupid) {
-        return mongoUserService.addGroup(id, groupid);
+    public boolean addGroup(@RequestAttribute("UserId") int id, @RequestParam int groupId) {
+        return mongoUserService.addGroup(id, groupId);
     }
 
 }

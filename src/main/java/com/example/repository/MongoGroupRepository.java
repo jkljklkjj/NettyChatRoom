@@ -7,5 +7,5 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 
 @Repository
 public interface MongoGroupRepository extends MongoRepository<MongoGroup, ObjectId> {
-    MongoGroup findByGroupid(int groupId);
+    MongoGroup findByGroupId(int groupId);
 }
