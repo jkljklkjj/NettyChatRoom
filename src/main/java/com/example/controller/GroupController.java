@@ -3,6 +3,7 @@ package com.example.controller;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -37,6 +38,7 @@ public class GroupController {
      * @param group Mysql中的群聊映射
      * @return 是否成功
      */
+    @Transactional
     @GetMapping("/register")
     public boolean register(@RequestParam Group group) {
         int id = groupService.register(group);
@@ -78,6 +80,7 @@ public class GroupController {
      * @param userId 用户ID
      * @return 是否成功
      */
+    @GetMapping("/addMember")
     public boolean addMember(int groupId, int userId) {
         MongoGroup mongoGroup = mongoGroupService.getGroup(groupId);
         MongoUser user = mongoUserService.getUserByUserId(userId);
@@ -94,8 +97,8 @@ public class GroupController {
      */
     @GetMapping("del")
     public boolean delGroup(@RequestParam int id) {
-        Group group = groupService.delGroup(id);
-        if(group == null){
+        int group = groupService.delGroup(id);
+        if(group == 0){
             return false;
         }
         return mongoGroupService.delGroup(id);

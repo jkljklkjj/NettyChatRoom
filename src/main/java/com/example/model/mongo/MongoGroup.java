@@ -3,6 +3,7 @@ package com.example.model.mongo;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.index.Indexed;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -11,6 +12,7 @@ import java.util.ArrayList;
 public class MongoGroup {
     @Id
     private ObjectId id;
+    @Indexed(unique = true)
     private final int groupid;
     private int admin;
     private List<Integer> members;

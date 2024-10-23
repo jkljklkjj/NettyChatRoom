@@ -3,6 +3,8 @@ package com.example.model.mongo;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.index.Indexed;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,6 +13,7 @@ import java.util.List;
 public class MongoUser {
     @Id
     private ObjectId id;
+    @Indexed(unique = true)
     private int userId; // 对应 MySQL 中的用户 ID
     private List<Integer> friends;
     private List<Integer> groups;

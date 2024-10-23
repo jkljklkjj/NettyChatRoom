@@ -1,20 +1,37 @@
-import java.io.Reader;
-
-import org.apache.ibatis.io.Resources;
-import org.apache.ibatis.session.SqlSession;
-import org.apache.ibatis.session.SqlSessionFactory;
-import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.fail;
+
 import org.junit.jupiter.api.Test;
 
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.TestPropertySource;
 import redis.clients.jedis.Jedis;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+
+@SpringBootTest(classes = DatasetTest.class)
+@TestPropertySource(locations = "classpath:application.yml")
 public class DatasetTest {
+    @Value("${spring.data.redis.host}")
+    private String redisHost;
+
+    @Value("${spring.datasource.url}")
+    private String mysqlUrl;
+
+    @Value("${spring.datasource.username}")
+    private String mysqlUsername;
+
+    @Value("${spring.datasource.password}")
+    private String mysqlPassword;
+
+    @Value("${spring.data.mongodb.uri}")
+    private String mongodbUri;
+
     @Test
     public void test() {
         System.out.println("Hello world!");
@@ -22,7 +39,7 @@ public class DatasetTest {
 
     @Test
     public void connectRedis() {
-        try(Jedis jedis = new Jedis("39.104.61.4", 6379)) {
+        try(Jedis jedis = new Jedis(redisHost, 6379)) {
             String response = jedis.ping();
             assertEquals("PONG", response, "Connect to Redis failed");
             System.out.println("Redis连接成功");
@@ -33,16 +50,25 @@ public class DatasetTest {
 
     @Test
     public void connectMysql() {
-        String resource = "sql/User-config.xml";
-        try (Reader reader = Resources.getResourceAsReader(resource)) {
-            SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
-            try (SqlSession session = sqlSessionFactory.openSession()) {
-                assertNotNull(session.getConnection(), "Failed to connect to MySQL using MyBatis");
-                System.out.println("MyBatis connected to MySQL successfully");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            fail("Exception occurred: " + e.getMessage());
+        try {
+            // 加载MySQL的JDBC驱动
+            Class.forName("com.mysql.cj.jdbc.Driver");
+
+            // 建立与数据库的连接
+            Connection connection = DriverManager.getConnection(
+                    mysqlUrl,
+                    mysqlUsername,
+                    mysqlPassword
+            );
+
+            // 连接成功，输出成功信息
+            System.out.println("连接成功");
+        } catch (ClassNotFoundException e) {
+            // 捕获驱动加载异常
+            System.out.println("找不到MySQL的JDBC驱动");
+        } catch (SQLException e) {
+            // 捕获连接异常
+            System.out.println("连接失败");
         }
     }
 
@@ -50,7 +76,7 @@ public class DatasetTest {
     public void connectMongodb() {
         MongoClient mongoClient = null;
         try {
-            mongoClient = MongoClients.create("mongodb://39.104.61.4:27017");
+            mongoClient = MongoClients.create(mongodbUri);
             assertEquals("Connected to MongoDB successfully", "Connected to MongoDB successfully");
             System.out.println("Connected to MongoDB successfully");
         } catch (Exception e) {

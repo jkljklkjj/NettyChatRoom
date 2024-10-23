@@ -5,6 +5,7 @@ spring:
     url: jdbc:mysql://39.104.61.4:3306/user
     username: root
     password: "@Aa123456"
+    driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
       minimum-idle: 5
       maximum-pool-size: 10
@@ -23,6 +24,12 @@ spring:
           min-idle: 2
     mongodb:
       uri: mongodb://39.104.61.4:27017/test?minPoolSize=0&maxPoolSize=100&maxIdleTimeMS=60000&waitQueueMultiple=5&waitQueueTimeoutMS=120000
+mybatis-plus:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.example.mapper
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 logging:
   level:
     org:

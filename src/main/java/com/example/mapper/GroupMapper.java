@@ -13,7 +13,6 @@ public interface GroupMapper {
      * @param id 群聊ID
      * @return 群聊信息
      */
-    @Select("SELECT * FROM `groups` WHERE id = #{id}")
     Group selectGroup(int id);
 
     /**
@@ -21,7 +20,6 @@ public interface GroupMapper {
      * @param name 群聊名称
      * @return 群聊信息
      */
-    @Select("SELECT * FROM `groups` WHERE name = #{name}")
     Group selectGroupByName(String name);
 
     /**
@@ -29,8 +27,6 @@ public interface GroupMapper {
      * @param group 群聊信息
      * @return id 自动生成的群聊ID
      */
-    @Insert("INSERT INTO `groups` (name, description) VALUES (#{name}, #{description})")
-    @Options(useGeneratedKeys = true, keyProperty = "id")
     int register(Group group);
 
     /**
@@ -38,6 +34,5 @@ public interface GroupMapper {
      * @param id 群聊ID
      * @return 群聊信息
      */
-    @Select("DELETE FROM `groups` WHERE id = #{id}")
-    Group delGroup(int id);
+    int delGroup(int id);
 }

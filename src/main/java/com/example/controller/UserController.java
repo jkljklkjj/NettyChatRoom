@@ -1,7 +1,5 @@
 package com.example.controller;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -46,8 +44,8 @@ public class UserController {
      * @param id 用户在Mysql自动生成的id
      * @return 用户的映射
      */
-    @GetMapping("/{id}")
-    public User getUserById(@PathVariable(name = "id", required = true) int id) {
+    @PostMapping("/get")
+    public User getUserById(@RequestAttribute("UserId") int id) {
         return userService.getUserById(id);
     }
 
@@ -69,6 +67,7 @@ public class UserController {
      */
     @PostMapping("/login")
     public String login(@RequestParam int id, @RequestParam String password,HttpServletRequest request) {
+        System.out.println("用户"+id+"登录中...");
         return userService.login(id, password,request);
     }
 
@@ -79,7 +78,7 @@ public class UserController {
     
 
     @PostMapping("/logout")
-    public boolean logout(@RequestParam int id){
+    public boolean logout(@RequestAttribute("UserId") int id){
         jedis.del("user:"+id);
         System.out.println("用户"+id+"已退出登录");
         return true;
@@ -101,38 +100,6 @@ public class UserController {
             return -1;
         }
         return id;
-    }
-
-    /**
-     * 添加好友
-     * @param id 用户 ID
-     * @param friendId 好友 ID
-     * @return 是否添加成功
-     */
-    @PostMapping("/addfriend")
-    public boolean addFriend(@RequestAttribute("UserId") int id, @RequestParam(name = "friendId", required = true) int friendId) {
-        return mongoUserService.addFriend(id, friendId);
-    }
-
-    /**
-     * 删除好友
-     * @param id 用户 ID
-     * @param friendid 好友 ID
-     * @return 是否删除成功
-     */
-    @PostMapping("/delfriend")
-    public boolean delFriend(@RequestAttribute("UserId") int id,@PathVariable(name = "id", required = true) int friendid) {
-        return mongoUserService.delFriend(id, friendid);
-    }
-
-    /**
-     * 获取好友列表
-     * @param id 用户 ID
-     * @return 好友列表
-     */
-    @PostMapping("/getfriend")
-    public List<Integer> getfriend(@RequestAttribute("UserId") int id) {
-        return mongoUserService.getFriends(id);
     }
 
     /**

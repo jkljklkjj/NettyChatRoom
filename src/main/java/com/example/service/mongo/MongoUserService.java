@@ -2,6 +2,8 @@ package com.example.service.mongo;
 
 import java.util.List;
 
+import com.example.mapper.UserMapper;
+import com.example.model.mysql.User;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,10 +17,12 @@ import com.example.repository.MongoUserRepository;
 public class MongoUserService {
     private final MongoUserRepository mongoUserRepository;
     private final MongoGroupRepository mongoGroupRepository;
+    private final UserMapper userMapper;
 
-    public MongoUserService(MongoUserRepository mongoUserRepository, MongoGroupRepository mongoGroupRepository) {
+    public MongoUserService(MongoUserRepository mongoUserRepository, MongoGroupRepository mongoGroupRepository, UserMapper userMapper) {
         this.mongoUserRepository = mongoUserRepository;
         this.mongoGroupRepository = mongoGroupRepository;
+        this.userMapper = userMapper;
     }
 
     /**
@@ -102,9 +106,10 @@ public class MongoUserService {
      * @param userId 当前用户Mysql的ID
      * @return 是否成功
      */
-    public List<Integer> getFriends(int userId){
+    public List<User> getFriends(int userId){
         MongoUser user = mongoUserRepository.findByUserId(userId);
-        return user.getFriends();
+        List<Integer> friends = user.getFriends();
+        return userMapper.selectFriends(friends);
     }
 
     /**

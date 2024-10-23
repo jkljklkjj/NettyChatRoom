@@ -22,11 +22,12 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     private final UserDetailsService userDetailsService;
     private final JwtUtil jwtUtil;
     private final String REDIS_KEY_PREFIX = "user:";
-    private RedisService jedis;
+    private final RedisService jedis;
 
-    public JwtRequestFilter(UserDetailsService userDetailsService, JwtUtil jwtUtil) {
+    public JwtRequestFilter(UserDetailsService userDetailsService, JwtUtil jwtUtil, RedisService jedis) {
         this.userDetailsService = userDetailsService;
         this.jwtUtil = jwtUtil;
+        this.jedis = jedis;
     }
 
     @Override
@@ -36,6 +37,8 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
         String username = null;
         String jwt = null;
+
+        System.out.println("Request URL: " + request.getRequestURL());
 
         // 如果 Authorization 字段不为空且以 Bearer 开头
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {

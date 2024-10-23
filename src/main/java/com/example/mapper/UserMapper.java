@@ -1,20 +1,20 @@
-package com.example.dao;
+package com.example.mapper;
 
-import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Options;
-import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Param;
 import com.example.model.mysql.User;
+
+import java.util.List;
 
 @Mapper
 public interface UserMapper {
-    @Select("SELECT * FROM users WHERE id = #{id}")
     User selectUser(int id);
 
-    @Select("SELECT * FROM users WHERE username = #{name}")
     User selectUserByName(String name);
 
-    @Insert("INSERT INTO users(username, password, email, phone) VALUES(#{username}, #{password}, #{email}, #{phone})")
-    @Options(useGeneratedKeys = true, keyProperty = "id",keyColumn = "id")
     int insertUser(User user);
+
+    int updateUser(User user);
+
+    List<User> selectFriends(@Param("idList")  List<Integer> ids);
 }

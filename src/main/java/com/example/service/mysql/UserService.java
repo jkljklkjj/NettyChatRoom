@@ -40,7 +40,7 @@ public class UserService {
         if (res) {
             String ipAddress = request.getRemoteAddr();
             jedis.set("user:" + id + "ip", ipAddress);
-            String result = (String) jedis.get("user:" + id);
+            String result = (String) jedis.get("user:" + id+ "ip");
             System.out.println("用户" + id + "登录成功，IP地址为：" + result);
             // 生成token
             String token = jwtUtil.generateToken(String.valueOf(id));
