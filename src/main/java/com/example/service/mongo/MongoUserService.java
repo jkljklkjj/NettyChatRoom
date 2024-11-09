@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.example.mapper.UserMapper;
+import com.example.model.mysql.Group;
 import com.example.model.mysql.User;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
@@ -13,17 +14,20 @@ import com.example.model.mongo.MongoGroup;
 import com.example.model.mongo.MongoUser;
 import com.example.repository.MongoGroupRepository;
 import com.example.repository.MongoUserRepository;
+import com.example.service.mysql.GroupService;
 
 @Service
 public class MongoUserService {
     private final MongoUserRepository mongoUserRepository;
     private final MongoGroupRepository mongoGroupRepository;
     private final UserMapper userMapper;
+    private final GroupService groupService;
 
-    public MongoUserService(MongoUserRepository mongoUserRepository, MongoGroupRepository mongoGroupRepository, UserMapper userMapper) {
+    public MongoUserService(MongoUserRepository mongoUserRepository, MongoGroupRepository mongoGroupRepository, UserMapper userMapper, GroupService groupService) {
         this.mongoUserRepository = mongoUserRepository;
         this.mongoGroupRepository = mongoGroupRepository;
         this.userMapper = userMapper;
+        this.groupService = groupService;
     }
 
     /**
@@ -109,12 +113,34 @@ public class MongoUserService {
      * @return 是否成功
      */
     public List<User> getFriends(int userId){
+        if(mongoUserRepository.findByUserId(userId) == null){
+            System.out.println("用户不存在");
+            return new ArrayList<>();
+        }
         MongoUser user = mongoUserRepository.findByUserId(userId);
         List<Integer> friends = user.getFriends();
         if(friends.isEmpty()){
             return new ArrayList<>();
         }
         return userMapper.selectFriends(friends);
+    }
+
+    /**
+     * 获取用户的群组列表
+     * @param userId 当前用户Mysql的ID
+     * @return 群组列表
+     */
+    public List<Group> getGroups(int userId) {
+        MongoUser user = mongoUserRepository.findByUserId(userId);
+        if(user == null){
+            System.out.println("用户不存在");
+            return new ArrayList<>();
+        }
+        List<Integer> groups = user.getGroups();
+        if(groups.isEmpty()){
+            return new ArrayList<>();
+        }
+        return groupService.selectGroups(groups);
     }
 
     /**
@@ -133,6 +159,7 @@ public class MongoUserService {
         }
         if (user.addGroup(groupId) && group.addMember(userId)) {
             mongoUserRepository.save(user); // 保存更改到数据库
+            mongoGroupRepository.save(group); // 保存对方更改到数据库
             return true;
         }
         return false;

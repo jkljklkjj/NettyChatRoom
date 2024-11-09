@@ -3,9 +3,11 @@ package com.example.model.mongo;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.mongodb.core.index.Indexed;
 
 import java.util.List;
+import java.beans.Transient;
 import java.util.ArrayList;
 
 @Document(collection = "groups")
@@ -13,7 +15,7 @@ public class MongoGroup {
     @Id
     private ObjectId id;
     @Indexed(unique = true)
-    private final int groupId;
+    private int groupId;
     private int admin;
     private List<Integer> members;
 
@@ -43,6 +45,10 @@ public class MongoGroup {
         this.id = id;
     }
 
+    public void setGroupId(int groupId) {
+        this.groupId = groupId;
+    }
+
     public int getGroupId() {
         return groupId;
     }
@@ -63,15 +69,17 @@ public class MongoGroup {
         this.members = members;
     }
 
-    public boolean addMember(int memberId) {
-        if(members==null){
-            members = new ArrayList<>();
-        }
-        return members.add(memberId);
-    }
-
     public boolean removeMember(int memberId) {
         return members.remove(Integer.valueOf(memberId));
+    }
+
+    @Transactional
+    public boolean addMember(int memberId) {
+        if (members.contains(memberId)) {
+            return false;
+        }
+        members.add(memberId);
+        return true;
     }
 
     @Override

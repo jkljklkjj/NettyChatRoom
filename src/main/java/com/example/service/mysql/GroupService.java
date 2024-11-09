@@ -1,7 +1,10 @@
 package com.example.service.mysql;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import com.example.mapper.GroupMapper;
 import com.example.model.mysql.Group;
 
@@ -44,5 +47,9 @@ public class GroupService {
      */
     public int delGroup(int id) {
         return groupMapper.delGroup(id);
+    }
+
+    public List<Group> selectGroups(List<Integer> ids) {
+        return groupMapper.selectGroups(ids);
     }
 }
