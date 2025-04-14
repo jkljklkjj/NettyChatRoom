@@ -22,7 +22,7 @@ public class JwtRequestHandler extends SimpleChannelInboundHandler<FullHttpReque
         try {
             // 解析请求头
             String authorizationHeader = msg.headers().get("Authorization");
-            System.out.println("Request URL: " + msg.uri());
+//            System.out.println("Request URL: " + msg.uri());
 
             int userId = jwtService.validateTokenAndExtractUser(authorizationHeader);
             if (userId != 0) {

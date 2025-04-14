@@ -4,14 +4,15 @@ import org.slf4j.Logger;
 
 import com.alibaba.fastjson.JSONObject;
 import com.example.handler.MessageHandler;
-import com.example.handler.StringMessageHandler;
+import com.example.handler.SessionManager;
 
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
+import org.slf4j.LoggerFactory;
 
 public class ChatHandler implements MessageHandler {
-    private static final Logger logger = org.slf4j.LoggerFactory.getLogger(ChatHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(ChatHandler.class);
     @Override
     public void handle(JSONObject jsonMsg, ChannelHandlerContext ctx) {
         /*
@@ -22,7 +23,9 @@ public class ChatHandler implements MessageHandler {
         String targetClientId = jsonMsg.getString("targetClientId");
         String content = jsonMsg.getString("content");
         String UserId = jsonMsg.getString("UserId");
-        ChannelHandlerContext targetChannel = StringMessageHandler.get(targetClientId);
+        // TODO 先通过redis的位图检测在线状态
+        // TODO 如果不在线且用户存在，则把信息放到消息队列
+        ChannelHandlerContext targetChannel = SessionManager.get(targetClientId);
         if (targetChannel != null) {
             System.out.println("发送给客户端 " + targetClientId + " 的消息：" + content+" from "+UserId);
             ChannelFuture future = targetChannel.writeAndFlush(Unpooled.copiedBuffer(content.getBytes()));
