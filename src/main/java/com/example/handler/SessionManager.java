@@ -3,6 +3,7 @@ package com.example.handler;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.example.constant.ChannelConstant;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.util.AttributeKey;
 import org.slf4j.Logger;
@@ -13,7 +14,7 @@ public class SessionManager {
     // key: 用户Id value: 通道上下文
     private static final Map<String, ChannelHandlerContext> clientChannels = new ConcurrentHashMap<>();
     // 新增channel的信息
-    private static final AttributeKey<String> CLIENT_ID_KEY = AttributeKey.valueOf("clientId");
+    private static final AttributeKey<String> CLIENT_ID_KEY = AttributeKey.valueOf(ChannelConstant.CLIENT_ID_KEY);
 
     public SessionManager() {
     }

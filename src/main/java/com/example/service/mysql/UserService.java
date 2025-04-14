@@ -1,5 +1,6 @@
 package com.example.service.mysql;
 
+import com.example.constant.RedisPrefixConstant;
 import com.example.mapper.UserMapper;
 import com.example.model.mysql.User;
 import com.example.service.redis.RedisService;
@@ -15,7 +16,7 @@ import com.example.util.JwtUtil;
 @Service
 public class UserService {
     private final UserMapper userMapper;
-    private final String REDIS_KEY_PREFIX = "user:";
+
     private final RedisService jedis;
     private final JwtUtil jwtUtil;
 
@@ -58,8 +59,8 @@ public class UserService {
     }
 
     public User getUserById(int id) {
-        if (jedis.exists(REDIS_KEY_PREFIX + id)) {
-            return (User) jedis.get(REDIS_KEY_PREFIX + id);
+        if (jedis.exists(RedisPrefixConstant.USER_REDIS_KEY_PREFIX + id)) {
+            return (User) jedis.get(RedisPrefixConstant.USER_REDIS_KEY_PREFIX + id);
         }
         return userMapper.selectUser(id);
     }
