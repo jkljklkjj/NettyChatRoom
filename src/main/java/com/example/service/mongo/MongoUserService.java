@@ -120,7 +120,7 @@ public class MongoUserService {
     /**
      * 添加群组
      * @param userId 当前用户Mysql的ID
-     * @param groupId 群组的Mysqll的ID
+     * @param groupId 群组的Mysql的ID
      * @return 是否成功
      */
     @Transactional

@@ -2,7 +2,7 @@ server:
   port: 8088
 spring:
   datasource:
-    url: jdbc:mysql://39.104.61.4:3306/user
+    url: jdbc:mysql://localhost:3306/chat
     username: root
     password: "@Aa123456"
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -13,7 +13,7 @@ spring:
       idle-timeout: 600000
   data:
     redis:
-      host: 39.104.61.4
+      host: localhost
       port: 6379
       database: 2
       jedis:
@@ -23,7 +23,7 @@ spring:
           max-idle: 8
           min-idle: 2
     mongodb:
-      uri: mongodb://39.104.61.4:27017/test
+      uri: mongodb://localhost:27017/chat
       connection-timeout: 1000
       socket-timeout: 1500
       min-pool-size: 0
@@ -36,13 +36,13 @@ mybatis-plus:
   configuration:
     map-underscore-to-camel-case: true
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
-logging:
-  level:
-    org:
-      springframework: Error
-      apache:
-        ibatis: DEBUG
-      mybatis: DEBUG
-    com:
-      example:
-        mapper: debug
+#logging:
+#  level:
+#    org:
+#      springframework: Error
+#      apache:
+#        ibatis: DEBUG
+#      mybatis: DEBUG
+#    com:
+#      example:
+#        mapper: debug

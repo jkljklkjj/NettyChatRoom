@@ -1,6 +1,7 @@
 package com.example;
 
 import org.mybatis.spring.annotation.MapperScan;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.Async;
@@ -17,11 +18,13 @@ public class Application implements CommandLineRunner {
         SpringApplication.run(Application.class, args);
     }
 
+    @Autowired
+    private Server server;
+
     @Override
     @Async
     public void run(String... args) throws Exception {
         System.out.println("Netty服务端正在启动");
-        Server server = new Server(); // 使用8080端口作为Netty服务端的监听端口
         server.start(); // 启动Netty服务端
     }
 }

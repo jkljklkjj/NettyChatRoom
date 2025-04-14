@@ -28,7 +28,6 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<Object> {
                 if (contentType != null && contentType.contains("application/json")) {
                     JSONObject jsonMsg = JSONObject.parseObject(body);
                     System.out.println("转换后的JSON对象：" + jsonMsg);
-                    // TODO：将jwtToken获取的用户id放入jsonMsg中
                     String type = jsonMsg.getString("type");
                     MessageHandler handler = MessageHandlerFactory.create(type);
                     if (handler != null) {

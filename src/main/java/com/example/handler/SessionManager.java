@@ -3,21 +3,19 @@ package com.example.handler;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.alibaba.fastjson.JSONObject;
-import com.example.handler.MessageHandlerImpl.MessageHandlerFactory;
-
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.util.AttributeKey;
-import io.netty.util.ReferenceCountUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class StringMessageHandler extends SimpleChannelInboundHandler<String> {
-    private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(StringMessageHandler.class);
+public class SessionManager {
+    private static final Logger logger = LoggerFactory.getLogger(SessionManager.class);
     // key: 用户Id value: 通道上下文
     private static final Map<String, ChannelHandlerContext> clientChannels = new ConcurrentHashMap<>();
+    // 新增channel的信息
     private static final AttributeKey<String> CLIENT_ID_KEY = AttributeKey.valueOf("clientId");
 
-    public StringMessageHandler() {
+    public SessionManager() {
     }
 
     public static ChannelHandlerContext get(String clientId) {
@@ -25,6 +23,7 @@ public class StringMessageHandler extends SimpleChannelInboundHandler<String> {
     }
 
     public static void add(String clientId, ChannelHandlerContext ctx) {
+        ctx.channel().attr(CLIENT_ID_KEY).set(clientId);
         clientChannels.put(clientId, ctx);
     }
 
@@ -32,31 +31,11 @@ public class StringMessageHandler extends SimpleChannelInboundHandler<String> {
         clientChannels.remove(clientId);
     }
 
-    @Override
-    protected void channelRead0(ChannelHandlerContext ctx, String msg) {
-        try {
-            System.out.println("接收到的字符串消息：" + msg);
-            JSONObject jsonMsg = JSONObject.parseObject(msg);
-            String type = jsonMsg.getString("type");
-            MessageHandler handler = MessageHandlerFactory.create(type);
-            if (handler != null) {
-                handler.handle(jsonMsg, ctx);
-            }
-        } catch (Exception e) {
-            System.out.println("接收到的消息不是有效的 JSON 格式");
-            ctx.fireChannelRead(msg);
-        } finally {
-            ReferenceCountUtil.release(msg);
-        }
-    }
-
-    @Override
     public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
         String clientId = ctx.channel().remoteAddress().toString();
         System.out.println("客户端 " + clientId + " 已连接");
     }
 
-    @Override
     public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
         String clientId = ctx.channel().attr(CLIENT_ID_KEY).get();
         if (clientId != null) {
@@ -65,7 +44,6 @@ public class StringMessageHandler extends SimpleChannelInboundHandler<String> {
         }
     }
 
-    @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         System.out.println("客户端 " + ctx.channel().remoteAddress().toString() + " 出现异常");
         cause.printStackTrace();
