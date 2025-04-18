@@ -5,6 +5,12 @@ import com.example.handler.MessageHandler;
 import com.example.handler.SessionManager;
 
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.http.HttpResponseStatus;
+
+/**
+ * 处理登录请求的处理器类
+ * 登录信息的接收端是否在线
+ */
 
 public class LoginHandler implements MessageHandler {
     @Override
@@ -16,6 +22,7 @@ public class LoginHandler implements MessageHandler {
          */
         String clientId = jsonMsg.getString("UserId");
         SessionManager.add(clientId, ctx);
+        sendResponse(ctx, HttpResponseStatus.OK, "OK");
     }
-    
+
 }

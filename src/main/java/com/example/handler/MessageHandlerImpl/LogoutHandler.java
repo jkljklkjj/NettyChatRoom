@@ -6,6 +6,9 @@ import com.example.handler.SessionManager;
 
 import io.netty.channel.ChannelHandlerContext;
 
+/**
+ * 处理登出请求的处理器类
+ */
 public class LogoutHandler implements MessageHandler {
     @Override
     public void handle(JSONObject jsonMsg, ChannelHandlerContext ctx) {

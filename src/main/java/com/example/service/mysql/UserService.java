@@ -59,6 +59,9 @@ public class UserService {
         if (jedis.exists(RedisPrefixConstant.USER_REDIS_KEY_PREFIX + id)) {
             return JSON.parseObject(jedis.get(RedisPrefixConstant.USER_REDIS_KEY_PREFIX + id),User.class);
         }
-        return userMapper.selectUser(id);
+        User user = userMapper.selectUser(id);
+        System.out.println("从数据库中获取用户信息"+user.getUsername());
+        jedis.set(REDIS_KEY_PREFIX + id, user);
+        return user;
     }
 }

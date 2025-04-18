@@ -71,10 +71,16 @@ public class MongoUserService {
      */
     @Transactional
     public boolean addFriend(int userId, int friendId) {
+        if(userId == friendId){
+            System.out.println("不能添加自己为好友");
+            return false;
+        }
         MongoUser user = mongoUserRepository.findByUserId(userId);
         MongoUser friend = mongoUserRepository.findByUserId(friendId);
         if (user == null || friend == null) {
             // 获取当前用户
+            System.out.println("来源"+user+"好友"+friend);
+            System.out.println("用户不存在");
             return false;
         }
         if (user.addFriend(friendId) && friend.addFriend(userId)) {

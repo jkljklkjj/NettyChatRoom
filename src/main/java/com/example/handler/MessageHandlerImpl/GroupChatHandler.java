@@ -3,17 +3,11 @@ package com.example.handler.MessageHandlerImpl;
 import com.alibaba.fastjson.JSONObject;
 import com.example.controller.GroupController;
 import com.example.handler.MessageHandler;
-import com.example.handler.StringMessageHandler;
+import com.example.handler.SessionManager;
 import com.example.util.SpringContext;
 
-import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.http.DefaultFullHttpResponse;
-import io.netty.handler.codec.http.FullHttpResponse;
-import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpResponseStatus;
-import io.netty.handler.codec.http.HttpVersion;
-import io.netty.util.CharsetUtil;
 
 import java.util.List;
 
@@ -31,7 +25,7 @@ public class GroupChatHandler implements MessageHandler {
         GroupController groupController = SpringContext.getBean(GroupController.class);
         List<Integer> members = groupController.getUsers(Integer.parseInt(groupId));
         for (Integer member : members) {
-            StringMessageHandler.get(member.toString()).writeAndFlush(jsonMsg);
+            SessionManager.get(member.toString()).writeAndFlush(jsonMsg);
         }
         sendResponse(ctx, HttpResponseStatus.ACCEPTED, groupId);
     }
