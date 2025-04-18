@@ -2,12 +2,13 @@ package com.example.filter;
 
 import java.io.IOException;
 
-import org.springframework.stereotype.Component;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.example.util.JwtService;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 // @Component
 public class JwtRequestFilter extends OncePerRequestFilter {
@@ -18,8 +19,8 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(jakarta.servlet.http.HttpServletRequest request,
-            jakarta.servlet.http.HttpServletResponse response, jakarta.servlet.FilterChain filterChain)
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response, FilterChain filterChain)
             throws jakarta.servlet.ServletException, IOException {
                 
         System.out.println("Request URL: " + request.getRequestURL());

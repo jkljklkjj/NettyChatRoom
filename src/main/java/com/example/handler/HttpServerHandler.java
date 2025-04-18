@@ -32,6 +32,8 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<Object> {
                     MessageHandler handler = MessageHandlerFactory.create(type);
                     if (handler != null) {
                         handler.handle(jsonMsg, ctx);
+                    } else{
+                        throw new Exception("没有找到对应业务的处理器");
                     }
                 } else if (contentType.startsWith("multipart/form-data")) {
                     HttpPostRequestDecoder decoder = new HttpPostRequestDecoder(request);
@@ -62,6 +64,8 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<Object> {
             } else {
                 ctx.fireChannelRead(msg);
             }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         } finally {
             // No need to release the buffer here
         }

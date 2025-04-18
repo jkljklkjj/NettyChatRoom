@@ -3,6 +3,7 @@ package com.example.service.impl;
 import java.util.ArrayList;
 
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -10,7 +11,7 @@ import com.example.model.mysql.User;
 import com.example.service.mysql.UserService;
 
 @Service
-public class UserDetailServiceImpl implements org.springframework.security.core.userdetails.UserDetailsService {
+public class UserDetailServiceImpl implements UserDetailsService {
 
     private final UserService UserService;
 

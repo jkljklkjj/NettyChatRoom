@@ -1,5 +1,3 @@
-Use user;
-
 INSERT INTO users (username, password, email, phone) VALUES
     ('Peter', '123456', '22', '137290478'),
     ('Tom', '123456', '33', '137290478'),
