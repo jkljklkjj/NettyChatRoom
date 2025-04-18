@@ -1,5 +1,6 @@
 package com.example.service.mysql;
 
+import com.alibaba.fastjson.JSON;
 import com.example.constant.RedisPrefixConstant;
 import com.example.mapper.UserMapper;
 import com.example.model.mysql.User;
@@ -47,7 +48,7 @@ public class UserService {
             // 生成token
             String token = jwtUtil.generateToken(String.valueOf(id));
             System.out.println("用户" + id + "的token" + token);
-            jedis.set(token, id, 518400, TimeUnit.SECONDS);
+            jedis.set(token, String.valueOf(id), 518400, TimeUnit.SECONDS);
             return token;
         }
         return "";
@@ -60,7 +61,7 @@ public class UserService {
 
     public User getUserById(int id) {
         if (jedis.exists(RedisPrefixConstant.USER_REDIS_KEY_PREFIX + id)) {
-            return (User) jedis.get(RedisPrefixConstant.USER_REDIS_KEY_PREFIX + id);
+            return JSON.parseObject(jedis.get(RedisPrefixConstant.USER_REDIS_KEY_PREFIX + id),User.class);
         }
         return userMapper.selectUser(id);
     }

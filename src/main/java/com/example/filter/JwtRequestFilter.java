@@ -6,18 +6,12 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.example.util.JwtService;
+import com.example.util.JwtUtil;
 
 import jakarta.servlet.http.HttpServletResponse;
 
 // @Component
 public class JwtRequestFilter extends OncePerRequestFilter {
-    private final JwtService jwtService;
-
-    public JwtRequestFilter(JwtService jwtService) {
-        this.jwtService = jwtService;
-    }
-
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response, FilterChain filterChain)
@@ -36,7 +30,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
         try {
             // 如果 Authorization 字段不为空且以 Bearer 开头
-            int userId = jwtService.validateTokenAndExtractUser(authorizationHeader);
+            int userId = JwtUtil.validateTokenAndExtractUser(authorizationHeader);
             if (userId != 0) {
                 request.setAttribute("UserId", userId);
             } else {

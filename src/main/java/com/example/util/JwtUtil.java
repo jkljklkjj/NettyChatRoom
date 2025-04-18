@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import com.example.service.redis.RedisService;
 
 @Component
 public class JwtUtil {
@@ -48,6 +49,22 @@ public class JwtUtil {
 
     private boolean isTokenExpired(String token) {
         return extractClaims(token).getExpiration().before(new Date());
+    }
+
+    public static int validateTokenAndExtractUser(String authorizationHeader) {
+        RedisService jedis = new RedisService();
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            String jwt = authorizationHeader.substring(7);
+            // // 解析JWT
+            // Claims claims = jwtUtil.extractClaims(jwt);
+            // String username = claims.getSubject();
+
+            Integer userId = Integer.valueOf(jedis.get(jwt));
+            if (userId != null) {
+                return userId;
+            }
+        }
+        return 0;
     }
 
     public static void main(String[] args) {

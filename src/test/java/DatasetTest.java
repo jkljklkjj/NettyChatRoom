@@ -8,7 +8,6 @@ import com.mongodb.client.MongoClients;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
-import redis.clients.jedis.Jedis;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -37,16 +36,16 @@ public class DatasetTest {
         System.out.println("Hello world!");
     }
 
-    @Test
-    public void connectRedis() {
-        try(Jedis jedis = new Jedis(redisHost, 6379)) {
-            String response = jedis.ping();
-            assertEquals("PONG", response, "Connect to Redis failed");
-            System.out.println("Redis连接成功");
-        } catch (Exception e) {
-            e.printStackTrace();
-        } 
-    }
+    // @Test
+    // public void connectRedis() {
+    //     try(Jedis jedis = new Jedis(redisHost, 6379)) {
+    //         String response = jedis.ping();
+    //         assertEquals("PONG", response, "Connect to Redis failed");
+    //         System.out.println("Redis连接成功");
+    //     } catch (Exception e) {
+    //         e.printStackTrace();
+    //     } 
+    // }
 
     @Test
     public void connectMysql() {
