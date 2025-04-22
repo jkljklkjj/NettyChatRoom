@@ -9,6 +9,7 @@ public class MessageHandlerFactory {
             case ServiceConstant.CHAT -> new ChatHandler();
             case ServiceConstant.LOGIN -> new LoginHandler();
             case ServiceConstant.LOGOUT -> new LogoutHandler();
+            case ServiceConstant.CHECK -> new CheckHandler();
             default -> null;
         };
     }

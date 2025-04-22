@@ -11,21 +11,17 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.example.util.JwtUtil;
 
 @Service
 public class UserService {
-    private final UserMapper userMapper;
+    @Autowired
+    private UserMapper userMapper;
 
-    private final RedisService jedis;
-    private final JwtUtil jwtUtil;
-
-    public UserService(UserMapper userMapper, RedisService redisService, JwtUtil jwtUtil) {
-        this.userMapper = userMapper;
-        this.jedis = redisService;
-        this.jwtUtil = jwtUtil;
-    }
+    @Autowired
+    private RedisService jedis;
 
     public int register(User user) {
         System.out.println("有顾客正在注册");
@@ -46,7 +42,7 @@ public class UserService {
             String result = (String) jedis.get("user:" + id+ "ip");
             System.out.println("用户" + id + "登录成功，IP地址为：" + result);
             // 生成token
-            String token = jwtUtil.generateToken(String.valueOf(id));
+            String token = JwtUtil.generateToken(String.valueOf(id));
             System.out.println("用户" + id + "的token" + token);
             jedis.set(token, String.valueOf(id), 518400, TimeUnit.SECONDS);
             return token;

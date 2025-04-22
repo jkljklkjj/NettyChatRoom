@@ -2,19 +2,15 @@ package com.example.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.annotation.web.configurers.LogoutConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.http.HttpMethod;
-
-import com.example.filter.JwtRequestFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -29,12 +25,12 @@ public class SecurityConfig {
                     .requestMatchers(HttpMethod.POST, "user/login").permitAll()
                     .requestMatchers(HttpMethod.POST, "user/register").permitAll()
                     .requestMatchers("/error").permitAll()
-                    .anyRequest().authenticated();
+                    .anyRequest().permitAll();
             })
             .sessionManagement(sessionManagement ->
                 sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            )
-            .addFilterBefore(new JwtRequestFilter(), UsernamePasswordAuthenticationFilter.class);
+            );
+            // .addFilterBefore(new JwtRequestFilter(), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

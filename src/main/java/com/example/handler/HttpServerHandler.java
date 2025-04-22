@@ -1,7 +1,10 @@
 package com.example.handler;
 
+import java.io.IOException;
+
 import com.alibaba.fastjson.JSONObject;
 import com.example.handler.MessageHandlerImpl.MessageHandlerFactory;
+
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.FullHttpRequest;
@@ -12,8 +15,6 @@ import io.netty.handler.codec.http.multipart.InterfaceHttpData;
 import io.netty.handler.codec.http.multipart.MixedFileUpload;
 import io.netty.util.CharsetUtil;
 
-import java.io.IOException;
-
 public class HttpServerHandler extends SimpleChannelInboundHandler<Object> {
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Object msg) {
@@ -22,9 +23,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<Object> {
             if (msg instanceof FullHttpRequest request) {
                 System.out.println("接收到HTTP请求：" + request);
                 String contentType = request.headers().get(HttpHeaderNames.CONTENT_TYPE);
-                System.out.println("HTTP请求头中的Content-Type：" + contentType);
                 String body = request.content().toString(CharsetUtil.UTF_8);
-                System.out.println("HTTP请求体：" + body);
                 if (contentType != null && contentType.contains("application/json")) {
                     JSONObject jsonMsg = JSONObject.parseObject(body);
                     System.out.println("转换后的JSON对象：" + jsonMsg);
@@ -33,7 +32,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<Object> {
                     if (handler != null) {
                         handler.handle(jsonMsg, ctx);
                     } else{
-                        throw new Exception("没有找到对应业务的处理器");
+                        throw new Exception("没有找到对应业务的处理器"+type);
                     }
                 } else if (contentType.startsWith("multipart/form-data")) {
                     HttpPostRequestDecoder decoder = new HttpPostRequestDecoder(request);
@@ -67,7 +66,6 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<Object> {
         } catch (Exception e) {
             throw new RuntimeException(e);
         } finally {
-            // No need to release the buffer here
         }
     }
 

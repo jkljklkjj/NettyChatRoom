@@ -2,22 +2,30 @@ package com.example.filter;
 
 import java.io.IOException;
 
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.example.util.JwtUtil;
 
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-// @Component
+@Component
 public class JwtRequestFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response, FilterChain filterChain)
-            throws jakarta.servlet.ServletException, IOException {
-                
+            HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
+
         System.out.println("Request URL: " + request.getRequestURL());
+        int serverPort = request.getServerPort();
+        if (serverPort != 8088) {
+            // System.out.println("非 8080 端口请求，直接放行");
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         String requestURI = request.getRequestURI();
         if (requestURI.endsWith("/user/login") || requestURI.endsWith("/user/register")) {

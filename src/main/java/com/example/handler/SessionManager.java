@@ -23,13 +23,23 @@ public class SessionManager {
         return clientChannels.get(clientId);
     }
 
+    /**
+     * 用户上线
+     */
     public static void add(String clientId, ChannelHandlerContext ctx) {
         ctx.channel().attr(CLIENT_ID_KEY).set(clientId);
         clientChannels.put(clientId, ctx);
     }
 
+    /**
+     * 用户下线
+     */
     public static void remove(String clientId) {
         clientChannels.remove(clientId);
+    }
+
+    public static boolean isOnline(String clientId){
+        return clientChannels.containsKey(clientId);
     }
 
     public void handlerAdded(ChannelHandlerContext ctx) throws Exception {

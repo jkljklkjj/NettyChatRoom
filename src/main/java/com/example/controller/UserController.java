@@ -36,8 +36,6 @@ public class UserController {
 
     @Autowired
     private RedisService jedis;
-    @Autowired
-    private JwtUtil jwtUtil;
 
     public UserController(UserService userService,MongoUserService mongoUserService) {
         this.userService = userService;
@@ -81,7 +79,7 @@ public class UserController {
 
     @PostMapping("/validate")
     public boolean validate(@RequestParam String token){
-        return jwtUtil.validateToken(token, jwtUtil.extractClaims(token).getSubject());
+        return JwtUtil.validateToken(token, JwtUtil.extractClaims(token).getSubject());
     }
     
     @ApiOperation(value = "退出登录")

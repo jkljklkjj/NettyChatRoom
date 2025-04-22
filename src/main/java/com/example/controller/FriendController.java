@@ -1,16 +1,21 @@
 package com.example.controller;
 
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.example.model.mysql.User;
 import com.example.service.mongo.MongoUserService;
 import com.example.service.mysql.UserService;
 import com.example.service.redis.RedisService;
-import com.example.util.JwtUtil;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.Api;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 @Api(tags = "好友管理")
 @RestController
@@ -19,10 +24,6 @@ public class FriendController {
     private final UserService userService;
     private final MongoUserService mongoUserService;
 
-    @Autowired
-    private RedisService jedis;
-    @Autowired
-    private JwtUtil jwtUtil;
 
     public FriendController(UserService userService, MongoUserService mongoUserService) {
         this.userService = userService;
