@@ -19,4 +19,9 @@ public class ServiceConstant {
      * 聊天服务
      */
     public static final String CHAT = "chat";
+
+    /**
+     * 检测用户在线状态
+     */
+    public static final String CHECK = "check";
 }
