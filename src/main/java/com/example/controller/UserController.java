@@ -1,8 +1,5 @@
 package com.example.controller;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,6 +18,9 @@ import com.example.service.mysql.UserService;
 import com.example.service.redis.RedisService;
 import com.example.util.JwtUtil;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import jakarta.servlet.http.HttpServletRequest;
 
 /**
@@ -48,7 +48,7 @@ public class UserController {
      * @return 用户的映射
      */
     @ApiOperation(value = "获取用户信息")
-    @PostMapping("/get")
+    @GetMapping("/get")
     public User getUserById(@RequestAttribute("UserId") int id) {
         return userService.getUserById(id);
     }

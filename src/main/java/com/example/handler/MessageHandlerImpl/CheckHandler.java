@@ -12,7 +12,7 @@ import io.netty.handler.codec.http.HttpVersion;
 import io.netty.util.CharsetUtil;
 
 public class CheckHandler implements MessageHandler {
-    @Override
+        @Override
     public void handle(JSONObject jsonMsg, ChannelHandlerContext ctx) {
         /*
          * 要求信息：
@@ -21,25 +21,39 @@ public class CheckHandler implements MessageHandler {
          */
         String clientId = jsonMsg.getString("targetClientId");
         boolean online = SessionManager.isOnline(clientId);
-
+    
         // 构造响应消息
         JSONObject response = new JSONObject();
         response.put("clientId", clientId);
         response.put("online", online);
+    
+        // 将响应消息转换为字节数组
+        byte[] responseBytes = response.toJSONString().getBytes(CharsetUtil.UTF_8);
+    
         // 返回响应
+        DefaultFullHttpResponse httpResponse;
         if (online) {
             // 用户在线，返回 200 状态码
-            ctx.writeAndFlush(new DefaultFullHttpResponse(
+            httpResponse = new DefaultFullHttpResponse(
                     HttpVersion.HTTP_1_1,
                     HttpResponseStatus.OK,
-                    Unpooled.copiedBuffer(response.toJSONString(), CharsetUtil.UTF_8)));
+                    Unpooled.wrappedBuffer(responseBytes)
+            );
         } else {
             // 用户不在线，返回 404 状态码
-            ctx.writeAndFlush(new DefaultFullHttpResponse(
+            httpResponse = new DefaultFullHttpResponse(
                     HttpVersion.HTTP_1_1,
                     HttpResponseStatus.NOT_FOUND,
-                    Unpooled.copiedBuffer(response.toJSONString(), CharsetUtil.UTF_8)));
+                    Unpooled.wrappedBuffer(responseBytes)
+            );
         }
+    
+        // 设置 Content-Length 和 Content-Type
+        httpResponse.headers().set("Content-Length", responseBytes.length);
+        httpResponse.headers().set("Content-Type", "application/json; charset=UTF-8");
+    
+        // 写回响应
+        ctx.writeAndFlush(httpResponse);
     }
 
 }

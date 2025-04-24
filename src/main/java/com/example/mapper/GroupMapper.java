@@ -1,9 +1,9 @@
 package com.example.mapper;
 
-import org.apache.ibatis.annotations.Insert;
+import java.util.List;
+
 import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Options;
-import org.apache.ibatis.annotations.Select;
+
 import com.example.model.mysql.Group;
 
 @Mapper
@@ -14,6 +14,13 @@ public interface GroupMapper {
      * @return 群聊信息
      */
     Group selectGroup(int id);
+
+    /**
+     * 根据用户id查询所在群聊
+     * @param userId
+     * @return
+     */
+    List<Group> selectGroups(List<Integer> groups);
 
     /**
      * 根据名称查询群聊

@@ -1,12 +1,14 @@
 package com.example.controller;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.example.model.mongo.MongoGroup;
 import com.example.model.mongo.MongoUser;
@@ -14,6 +16,9 @@ import com.example.model.mysql.Group;
 import com.example.service.mongo.MongoGroupService;
 import com.example.service.mongo.MongoUserService;
 import com.example.service.mysql.GroupService;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 /**
  * 群聊相关接口
@@ -40,7 +45,7 @@ public class GroupController {
      */
     @ApiOperation(value = "注册群聊")
     @Transactional(rollbackFor = Exception.class)
-    @GetMapping("/register")
+    @RequestMapping("/register")
     public int register(@RequestAttribute("UserId") int id, @RequestParam Group group) {
         int groupId = groupService.register(group);
         MongoGroup mongoGroup = new MongoGroup(groupId, id);
@@ -56,9 +61,20 @@ public class GroupController {
      * @return 群聊信息
      */
     @ApiOperation(value = "获取群聊信息")
-    @GetMapping("/get")
+    @RequestMapping("/get/detail")
     public Group get(@RequestParam int id) {
         return groupService.selectGroup(id);
+    }
+
+    /**
+     * 获取群聊列表
+     * @param id 用户 ID
+     * @return 群聊列表
+     */
+    @ApiOperation(value = "获取好友列表")
+    @GetMapping("/get")
+    public List<Group> getGroup(@RequestAttribute("UserId") int id) {
+        return mongoGroupService.getGroups(id);
     }
 
     /**
@@ -67,7 +83,7 @@ public class GroupController {
      * @return 成员ID列表
      */
     @ApiOperation(value = "获取群聊成员")
-    @PostMapping("/getUsers")
+    @RequestMapping("/getUsers")
     public List<Integer> getUsers(@RequestParam int id) {
         MongoGroup mongoGroup = mongoGroupService.getGroup(id);
         return mongoGroup.getMembers();

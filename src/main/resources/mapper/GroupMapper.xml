@@ -7,6 +7,13 @@
         SELECT * FROM `groups` WHERE id = #{id}
     </select>
 
+    <select id="selectGroups" resultType="com.example.model.mysql.Group">
+        SELECT * FROM `groups` WHERE id IN
+        <foreach item="item" index="index" collection="groups" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
     <select id="selectGroupByName" resultType="com.example.model.mysql.Group">
         SELECT * FROM `groups` WHERE name = #{name}
     </select>

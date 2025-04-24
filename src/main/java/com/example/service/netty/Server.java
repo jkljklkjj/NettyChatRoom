@@ -1,7 +1,10 @@
 package com.example.service.netty;
 
+import org.springframework.stereotype.Component;
+
 import com.example.handler.HttpServerHandler;
 import com.example.handler.JwtRequestHandler;
+
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -11,10 +14,6 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.codec.http.HttpResponseEncoder;
-import io.netty.handler.codec.string.StringDecoder;
-import io.netty.handler.codec.string.StringEncoder;
-
-import org.springframework.stereotype.Component;
 
 @Component
 public class Server {
@@ -41,8 +40,6 @@ public class Server {
                             ch.pipeline().addLast(new HttpResponseEncoder());
                             ch.pipeline().addLast(new JwtRequestHandler());
                             ch.pipeline().addLast(new HttpServerHandler());
-                            ch.pipeline().addLast(new StringDecoder());
-                            ch.pipeline().addLast(new StringEncoder());
                         }
                     });
             ChannelFuture f = b.bind(PORT).sync();

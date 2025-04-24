@@ -1,17 +1,28 @@
 package com.example.service.mongo;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import com.example.repository.MongoGroupRepository;
+
 import com.example.model.mongo.MongoGroup;
-import org.bson.types.ObjectId;
+import com.example.model.mongo.MongoUser;
+import com.example.mapper.GroupMapper;
+import com.example.model.mysql.Group;
+import com.example.repository.MongoGroupRepository;
+import com.example.repository.MongoUserRepository;
 
 @Service
 public class MongoGroupService {
-    private final MongoGroupRepository mongoGroupRepository;
+    @Autowired
+    private MongoGroupRepository mongoGroupRepository;
 
-    private MongoGroupService(MongoGroupRepository mongoGroupRepository) {
-        this.mongoGroupRepository = mongoGroupRepository;
-    }
+    @Autowired
+    private GroupMapper groupMapper;
+
+    @Autowired
+    private MongoUserRepository mongoUserRepository;
 
     /**
      * 在MonggoDB中注册群聊
@@ -65,5 +76,14 @@ public class MongoGroupService {
         }
         mongoGroupRepository.delete(group);
         return true;
+    }
+
+    public List<Group> getGroups(int userId) {
+        MongoUser user = mongoUserRepository.findByUserId(userId);
+        List<Integer> groups = user.getGroups();
+        if(groups.isEmpty()){
+            return new ArrayList<>();
+        }
+        return groupMapper.selectGroups(groups);
     }
 }

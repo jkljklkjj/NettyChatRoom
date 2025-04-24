@@ -1,7 +1,7 @@
 package com.example.constant;
 
 /**
- * 服务类型常量
+ * Netty服务类型常量
  */
 public class ServiceConstant {
 

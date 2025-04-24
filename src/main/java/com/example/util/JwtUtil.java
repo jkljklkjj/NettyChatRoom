@@ -60,8 +60,8 @@ public class JwtUtil {
     }
 
     public static void main(String[] args) {
-        JwtUtil jwtUtil = new JwtUtil();
-        String token = jwtUtil.generateToken("1");
+        String token = JwtUtil.generateToken("1");
         System.out.println(token);
+        System.out.println(JwtUtil.validateTokenAndExtractUser(token));
     }
 }
