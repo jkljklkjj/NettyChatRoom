@@ -79,7 +79,7 @@ public class GroupController {
 
     /**
      * 获取群聊成员
-     * @param groupId 群聊ID
+     * @param id 群聊ID
      * @return 成员ID列表
      */
     @ApiOperation(value = "获取群聊成员")

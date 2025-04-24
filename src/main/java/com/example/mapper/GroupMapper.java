@@ -16,8 +16,8 @@ public interface GroupMapper {
     Group selectGroup(int id);
 
     /**
-     * 根据用户id查询所在群聊
-     * @param userId
+     * 根据ID列表查询群聊
+     * @param groups
      * @return
      */
     List<Group> selectGroups(List<Integer> groups);
