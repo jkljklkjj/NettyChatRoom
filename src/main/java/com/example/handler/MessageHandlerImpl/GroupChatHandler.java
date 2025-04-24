@@ -27,6 +27,5 @@ public class GroupChatHandler implements MessageHandler {
         for (Integer member : members) {
             SessionManager.get(member.toString()).writeAndFlush(jsonMsg);
         }
-        sendResponse(ctx, HttpResponseStatus.ACCEPTED, groupId);
     }
 }

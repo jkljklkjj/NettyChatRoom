@@ -22,7 +22,6 @@ public class LoginHandler implements MessageHandler {
          */
         String clientId = jsonMsg.getString("UserId");
         SessionManager.add(clientId, ctx);
-        sendResponse(ctx, HttpResponseStatus.OK, "OK");
     }
 
 }

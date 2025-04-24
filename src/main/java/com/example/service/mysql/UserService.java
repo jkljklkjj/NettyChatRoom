@@ -61,7 +61,7 @@ public class UserService {
         }
         User user = userMapper.selectUser(id);
         System.out.println("从数据库中获取用户信息"+user.getUsername());
-        jedis.set(REDIS_KEY_PREFIX + id, user);
+        jedis.set(RedisPrefixConstant.USER_REDIS_KEY_PREFIX + id, JSON.toJSONString(user), 518400, TimeUnit.SECONDS);
         return user;
     }
 }
