@@ -4,18 +4,31 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.example.constant.ChannelConstant;
+import com.example.constant.RedisPrefixConstant;
 import io.netty.channel.Channel;
+import com.example.constant.RedisPrefixConstant;
+import com.example.service.redis.RedisService;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.util.AttributeKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+@Component
 public class SessionManager {
     private static final Logger logger = LoggerFactory.getLogger(SessionManager.class);
     // key: 用户Id, value: channelId
     private static final Map<String, Channel> clientChannelMap = new ConcurrentHashMap<>();
     // 新增channel的信息
     private static final AttributeKey<String> CLIENT_ID_KEY = AttributeKey.valueOf(ChannelConstant.CLIENT_ID_KEY);
+
+    private static RedisService redisService;
+
+    @Autowired
+    public void setRedisService(RedisService redisService) {
+        SessionManager.redisService = redisService;
+    }
 
     public SessionManager() {
     }
@@ -34,6 +47,8 @@ public class SessionManager {
      */
     public static void add(String clientId, ChannelHandlerContext ctx) {
         ctx.channel().attr(CLIENT_ID_KEY).set(clientId);
+        // 设置用户在线状态
+        redisService.setBit(RedisPrefixConstant.USER_ONLINE_STATUS_KEY, Integer.valueOf(clientId), true);
         clientChannelMap.put(clientId, ctx.channel());
     }
 
@@ -41,6 +56,8 @@ public class SessionManager {
      * 用户下线
      */
     public static void remove(String clientId) {
+        // 设置用户离线状态
+        redisService.setBit(RedisPrefixConstant.USER_ONLINE_STATUS_KEY, Integer.valueOf(clientId), false);
         Channel channel = clientChannelMap.remove(clientId);
         if (channel != null) {
             channel.close();
@@ -51,6 +68,9 @@ public class SessionManager {
     }
 
     public static boolean isOnline(String clientId) {
+        if(!redisService.getBit(RedisPrefixConstant.USER_ONLINE_STATUS_KEY,Integer.valueOf(clientId))){
+            return false;
+        }
         return clientChannelMap.containsKey(clientId);
     }
 

@@ -35,4 +35,18 @@ public class RedisService {
     public void del(String key) {
         redisTemplate.delete(key);
     }
+
+    /**
+     * 设置位图的值
+     * @param key 位图对应键
+     * @param offset 位图偏移量
+     * @param value 位图值
+     */
+    public void setBit(String key, long offset, boolean value) {
+        redisTemplate.opsForValue().setBit(key, offset, value);
+    }
+
+    public boolean getBit(String key, long offset) {
+        return redisTemplate.opsForValue().getBit(key, offset);
+    }
 }
