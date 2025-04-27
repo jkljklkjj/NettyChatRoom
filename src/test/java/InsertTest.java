@@ -12,8 +12,6 @@ import com.mongodb.client.MongoClients;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
-import redis.clients.jedis.Jedis;
-
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;

@@ -71,7 +71,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<Object> {
 
     @Override
     public void channelReadComplete(ChannelHandlerContext ctx) {
-        System.out.println("HTTP请求处理完成");
+//        System.out.println("HTTP请求处理完成");
         ctx.flush();
     }
 

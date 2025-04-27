@@ -1,5 +1,6 @@
 package com.example.service.netty;
 
+import io.netty.handler.codec.http.*;
 import org.springframework.stereotype.Component;
 
 import com.example.handler.HttpServerHandler;
@@ -11,9 +12,6 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.handler.codec.http.HttpObjectAggregator;
-import io.netty.handler.codec.http.HttpRequestDecoder;
-import io.netty.handler.codec.http.HttpResponseEncoder;
 
 @Component
 public class Server {
@@ -37,8 +35,10 @@ public class Server {
                         protected void initChannel(NioSocketChannel ch) throws Exception {
                             ch.pipeline().addLast(new HttpRequestDecoder());
                             ch.pipeline().addLast(new HttpObjectAggregator(65536));
+                            ch.pipeline().addLast(new HttpResponseDecoder());
                             ch.pipeline().addLast(new HttpResponseEncoder());
                             ch.pipeline().addLast(new JwtRequestHandler());
+//                            ch.pipeline().addLast(new HttpRequestEncoder());
                             ch.pipeline().addLast(new HttpServerHandler());
                         }
                     });

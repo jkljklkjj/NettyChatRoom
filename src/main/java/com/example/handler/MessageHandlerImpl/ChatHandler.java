@@ -10,6 +10,7 @@ import com.example.handler.SessionManager;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.Channel;
 import io.netty.handler.codec.http.DefaultFullHttpRequest;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.FullHttpRequest;
@@ -34,11 +35,11 @@ public class ChatHandler implements MessageHandler {
         FullHttpRequest httpRequest = buildHttpRequest(content, timestamp);
 
         if (SessionManager.isOnline(targetClientId)) {
-            ChannelHandlerContext targetChannel = SessionManager.get(targetClientId);
+            Channel targetChannel = SessionManager.get(targetClientId);
             System.out.println("发送给客户端 " + targetClientId + " 的消息：" + content + " from " + userId);
 
             // 发送消息
-            sendMessage(targetChannel, content, ctx);
+            sendMessage(ctx,targetChannel, content);
         } else {
             System.out.println("目标客户端不在线");
             sendResponse(ctx, "该好友不在线", HttpResponseStatus.ACCEPTED);
@@ -59,38 +60,12 @@ public class ChatHandler implements MessageHandler {
                 HttpVersion.HTTP_1_1,
                 HttpMethod.POST,
                 "/chat",
-                Unpooled.wrappedBuffer(requestBodyBytes));
+                Unpooled.copiedBuffer(requestBodyBytes));
 
         httpRequest.headers().set(HttpHeaderNames.CONTENT_TYPE, "application/json; charset=UTF-8");
         httpRequest.headers().set(HttpHeaderNames.CONTENT_LENGTH, requestBodyBytes.length);
 
         return httpRequest;
-    }
-
-    /**
-     * 发送消息到目标客户端
-     */
-    private void sendMessage(ChannelHandlerContext targetChannel, String content, ChannelHandlerContext ctx) {
-        // 构建 FullHttpRequest
-        FullHttpRequest httpRequest = buildHttpRequest(content, String.valueOf(System.currentTimeMillis()));
-        if (targetChannel.channel() == null || !targetChannel.channel().isActive()) {
-            System.out.println("目标客户端的通道已失效");
-            sendResponse(ctx, "目标客户端的通道已失效", HttpResponseStatus.INTERNAL_SERVER_ERROR);
-            return;
-        }
-
-        // 发送 HTTP 请求
-        ChannelFuture future = targetChannel.channel().writeAndFlush(httpRequest);
-        future.addListener(f -> {
-            if (f.isSuccess()) {
-                System.out.println("消息发送成功");
-                sendResponse(ctx, "消息发送成功", HttpResponseStatus.OK);
-            } else {
-                f.cause().printStackTrace();
-                logger.info("消息发送失败");
-                sendResponse(ctx, "消息发送失败", HttpResponseStatus.ACCEPTED);
-            }
-        });
     }
 
     /**
@@ -107,5 +82,34 @@ public class ChatHandler implements MessageHandler {
         response.headers().set(HttpHeaderNames.CONTENT_LENGTH, responseBytes.length);
 
         ctx.writeAndFlush(response);
+    }
+
+    /**
+     * 转发信息
+     * @param ctx 信息发送客户
+     * @param channel 信息接收客户
+     * @param message 信息内容
+     */
+    private void sendMessage(ChannelHandlerContext ctx,Channel channel, String message) {
+        byte[] responseBytes = message.getBytes(CharsetUtil.UTF_8);
+        FullHttpResponse response = new DefaultFullHttpResponse(
+                HttpVersion.HTTP_1_1,
+                HttpResponseStatus.OK,
+                Unpooled.copiedBuffer(responseBytes));
+
+        response.headers().set(HttpHeaderNames.CONTENT_TYPE, "text/plain; charset=UTF-8");
+        response.headers().set(HttpHeaderNames.CONTENT_LENGTH, responseBytes.length);
+
+        ChannelFuture future =channel.writeAndFlush(response);
+        future.addListener(f -> {
+            if (f.isSuccess()) {
+                System.out.println("消息发送成功");
+                sendResponse(ctx, "消息发送成功", HttpResponseStatus.OK);
+            } else {
+                logger.info("消息发送失败");
+                f.cause().printStackTrace();
+                sendResponse(ctx, "消息发送失败", HttpResponseStatus.ACCEPTED);
+            }
+        });
     }
 }
