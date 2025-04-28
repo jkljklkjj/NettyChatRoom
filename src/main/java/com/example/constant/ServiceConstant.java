@@ -24,4 +24,9 @@ public class ServiceConstant {
      * 检测用户在线状态
      */
     public static final String CHECK = "check";
+
+    /**
+     * 群聊服务
+     */
+    public static final String GROUP_CHAT = "groupChat";
 }

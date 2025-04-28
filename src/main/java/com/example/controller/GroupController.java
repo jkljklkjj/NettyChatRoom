@@ -71,7 +71,7 @@ public class GroupController {
      * @param id 用户 ID
      * @return 群聊列表
      */
-    @ApiOperation(value = "获取好友列表")
+    @ApiOperation(value = "获取用户群聊列表")
     @GetMapping("/get")
     public List<Group> getGroup(@RequestAttribute("UserId") int id) {
         return mongoGroupService.getGroups(id);

@@ -10,6 +10,7 @@ public class MessageHandlerFactory {
     public static MessageHandler create(String type) {
         return switch (type) {
             case ServiceConstant.CHAT -> new ChatHandler();
+            case ServiceConstant.GROUP_CHAT -> new GroupChatHandler();
             case ServiceConstant.LOGIN -> new LoginHandler();
             case ServiceConstant.LOGOUT -> new LogoutHandler();
             case ServiceConstant.CHECK -> new CheckHandler();
