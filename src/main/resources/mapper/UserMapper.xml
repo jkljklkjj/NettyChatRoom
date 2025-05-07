@@ -23,4 +23,8 @@
                 #{id}
             </foreach>
     </select>
+    
+    <select id="selectUserByEmail" resultType="com.example.model.mysql.User">
+        SELECT * FROM users WHERE email = #{email}
+    </select>
 </mapper>

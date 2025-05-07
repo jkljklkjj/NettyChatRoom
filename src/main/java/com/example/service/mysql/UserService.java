@@ -64,4 +64,14 @@ public class UserService {
         jedis.set(RedisPrefixConstant.USER_REDIS_KEY_PREFIX + id, JSON.toJSONString(user), 518400, TimeUnit.SECONDS);
         return user;
     }
+
+    public User getUserByEmail(String email) {
+        if (jedis.exists(RedisPrefixConstant.USER_REDIS_KEY_PREFIX + email)) {
+            return JSON.parseObject(jedis.get(RedisPrefixConstant.USER_REDIS_KEY_PREFIX + email),User.class);
+        }
+        User user = userMapper.selectUserByEmail(email);
+        System.out.println("从数据库中获取用户信息"+user.getUsername());
+        jedis.set(RedisPrefixConstant.USER_REDIS_KEY_PREFIX + email, JSON.toJSONString(user), 518400, TimeUnit.SECONDS);
+        return user;
+    }
 }

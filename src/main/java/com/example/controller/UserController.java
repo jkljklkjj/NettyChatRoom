@@ -65,18 +65,22 @@ public class UserController {
     }
 
     /**
-     * 登录
-     * @param id 用户 ID
+     * 根据邮箱和密码登录
+     * @param emailString 邮箱
      * @param password 密码
      * @return 是否登录成功
      */
-    @ApiOperation(value = "登录")
+    @ApiOperation(value = "根据用户名和密码登录")
     @PostMapping("/login")
-    public String login(@ApiParam("用户账号") @RequestParam int id, @ApiParam("密码") @RequestParam String password,HttpServletRequest request) {
-        System.out.println("用户"+id+"登录中...");
-        return userService.login(id, password,request);
-    }
+    public String loginByName(@ApiParam("用户名") @RequestParam String emailString, @ApiParam("密码") @RequestParam String password,HttpServletRequest request) {
+        System.out.println("邮箱为"+emailString+"的用户登录中...");
 
+        User user = userService.getUserByEmail(emailString);
+
+        return userService.login(user.getId(), password,request);
+
+    }
+    
     @PostMapping("/validate")
     public boolean validate(@RequestParam String token){
         return JwtUtil.validateToken(token, JwtUtil.extractClaims(token).getSubject());

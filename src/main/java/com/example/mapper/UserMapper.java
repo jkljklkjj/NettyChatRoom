@@ -12,6 +12,8 @@ public interface UserMapper {
 
     User selectUserByName(String name);
 
+    User selectUserByEmail(String email);
+
     int insertUser(User user);
 
     int updateUser(User user);
