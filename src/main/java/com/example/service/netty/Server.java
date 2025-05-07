@@ -1,6 +1,8 @@
 package com.example.service.netty;
 
+import com.example.handler.TimeoutHandler;
 import io.netty.handler.codec.http.*;
+import io.netty.handler.timeout.IdleStateHandler;
 import org.springframework.stereotype.Component;
 
 import com.example.handler.HttpServerHandler;
@@ -33,6 +35,8 @@ public class Server {
                     .childHandler(new ChannelInitializer<NioSocketChannel>() {
                         @Override
                         protected void initChannel(NioSocketChannel ch) throws Exception {
+                            ch.pipeline().addLast(new IdleStateHandler(300, 0, 0)); // 读超时 300 秒
+                            ch.pipeline().addLast(new TimeoutHandler());
                             ch.pipeline().addLast(new HttpRequestDecoder());
                             ch.pipeline().addLast(new HttpObjectAggregator(65536));
                             ch.pipeline().addLast(new HttpResponseDecoder());
