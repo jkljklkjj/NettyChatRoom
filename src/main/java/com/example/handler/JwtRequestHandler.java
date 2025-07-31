@@ -4,6 +4,7 @@ import java.nio.charset.StandardCharsets;
 
 import com.alibaba.fastjson.JSONObject;
 import com.example.util.JwtUtil;
+import org.springframework.stereotype.Component;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -11,6 +12,10 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.FullHttpRequest;
 
+/**
+ * 验证请求合法性handler
+ */
+@Component
 public class JwtRequestHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
 
     @Override
@@ -19,7 +24,7 @@ public class JwtRequestHandler extends SimpleChannelInboundHandler<FullHttpReque
             // 解析请求头
             String authorizationHeader = msg.headers().get("Authorization");
             int userId = JwtUtil.validateTokenAndExtractUser(authorizationHeader);
-            // String channelUserId = ctx.channel().attr(CLIENT_ID_KEY).get();
+            // String userId = ctx.channel().attr(CLIENT_ID_KEY).get();
             // if (userId ==Integer.parseInt(channelUserId)) {
             // 将请求体解析为 JSON 对象
             String body = msg.content().toString(StandardCharsets.UTF_8);
