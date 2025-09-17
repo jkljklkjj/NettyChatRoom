@@ -14,6 +14,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 @Component
 public class JwtRequestFilter extends OncePerRequestFilter {
+
     @Override
     protected void doFilterInternal(HttpServletRequest request,
             HttpServletResponse response, FilterChain filterChain)
@@ -38,6 +39,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
         try {
             // 如果 Authorization 字段不为空且以 Bearer 开头
+            // 瓶颈：需要解HMAC-SHA256签名
             int userId = JwtUtil.validateTokenAndExtractUser(authorizationHeader);
             if (userId != 0) {
                 request.setAttribute("UserId", userId);
