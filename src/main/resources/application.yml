@@ -30,6 +30,11 @@ spring:
       max-pool-size: 100
       max-idle-time: 60000
       wait-queue-timeout: 120000
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
 mybatis-plus:
   mapper-locations: classpath:mapper/*.xml
   type-aliases-package: com.example.mapper

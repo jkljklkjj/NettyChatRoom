@@ -9,9 +9,7 @@ import com.example.handler.MessageHandler;
 import com.example.handler.SessionManager;
 
 import io.netty.buffer.Unpooled;
-import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.Channel;
 import io.netty.handler.codec.http.DefaultFullHttpRequest;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.FullHttpRequest;
@@ -21,7 +19,9 @@ import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
 import io.netty.util.CharsetUtil;
+import org.springframework.stereotype.Component;
 
+@Component
 public class GroupChatHandler implements MessageHandler {
     private static final Logger logger = LoggerFactory.getLogger(ChatHandler.class);
 
@@ -98,6 +98,7 @@ public class GroupChatHandler implements MessageHandler {
         response.headers().set(HttpHeaderNames.CONTENT_LENGTH, responseBytes.length);
 
         if (channels != null) {
+            // TODO 处理群聊中不在线成员
             // 排除发送者的 Channel
             channels.writeAndFlush(response, channel -> channel != ctx.channel()).addListener(f -> {
                 if (f.isSuccess()) {

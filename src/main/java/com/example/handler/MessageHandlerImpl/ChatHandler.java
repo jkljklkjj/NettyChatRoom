@@ -1,5 +1,6 @@
 package com.example.handler.MessageHandlerImpl;
 
+import com.example.config.KafkaProducer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,9 +21,15 @@ import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
 import io.netty.util.CharsetUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+@Component
 public class ChatHandler implements MessageHandler {
     private static final Logger logger = LoggerFactory.getLogger(ChatHandler.class);
+
+    @Autowired
+    private KafkaProducer kafkaProducer;
 
     @Override
     public void handle(JSONObject jsonMsg, ChannelHandlerContext ctx) {
@@ -41,8 +48,10 @@ public class ChatHandler implements MessageHandler {
             // 发送消息
             sendMessage(ctx,targetChannel, content);
         } else {
+            // TODO 完成离线消息发送的测试
             System.out.println("目标客户端不在线");
-            sendResponse(ctx, "该好友不在线", HttpResponseStatus.ACCEPTED);
+            kafkaProducer.sendMessage(targetClientId, content);
+            sendResponse(ctx, "该好友不在线", HttpResponseStatus.OK);
         }
     }
 
