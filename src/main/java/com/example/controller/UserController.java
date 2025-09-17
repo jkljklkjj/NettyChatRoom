@@ -16,7 +16,7 @@ import com.example.model.mysql.User;
 import com.example.service.mongo.MongoUserService;
 import com.example.service.mysql.UserService;
 import com.example.service.redis.RedisService;
-import com.example.util.JwtUtil;
+import com.example.service.security.JwtService;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -33,13 +33,15 @@ import jakarta.servlet.http.HttpServletRequest;
 public class UserController {
     private final UserService userService;
     private final MongoUserService mongoUserService;
+    private final JwtService jwtService;
 
     @Autowired
     private RedisService jedis;
 
-    public UserController(UserService userService,MongoUserService mongoUserService) {
+    public UserController(UserService userService, MongoUserService mongoUserService, JwtService jwtService) {
         this.userService = userService;
         this.mongoUserService = mongoUserService;
+        this.jwtService = jwtService;
     }
 
     /**
@@ -93,7 +95,7 @@ public class UserController {
 
     @PostMapping("/validate")
     public boolean validate(@RequestParam String token){
-        return JwtUtil.validateToken(token, JwtUtil.extractClaims(token).getSubject());
+        return jwtService.validate(token);
     }
     
     @ApiOperation(value = "退出登录")

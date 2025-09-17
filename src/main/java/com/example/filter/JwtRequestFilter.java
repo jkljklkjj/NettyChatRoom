@@ -5,7 +5,7 @@ import java.io.IOException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.example.util.JwtUtil;
+import com.example.service.security.JwtService; // 新增
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -14,6 +14,11 @@ import jakarta.servlet.http.HttpServletResponse;
 
 @Component
 public class JwtRequestFilter extends OncePerRequestFilter {
+    private final JwtService jwtService;
+
+    public JwtRequestFilter(JwtService jwtService) {
+        this.jwtService = jwtService;
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -23,7 +28,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         System.out.println("Request URL: " + request.getRequestURL());
         int serverPort = request.getServerPort();
         if (serverPort != 8088) {
-            // System.out.println("非 8080 端口请求，直接放行");
             filterChain.doFilter(request, response);
             return;
         }
@@ -38,19 +42,15 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         final String authorizationHeader = request.getHeader("Authorization");
 
         try {
-            // 如果 Authorization 字段不为空且以 Bearer 开头
-            // 瓶颈：需要解HMAC-SHA256签名
-            int userId = JwtUtil.validateTokenAndExtractUser(authorizationHeader);
+            int userId = jwtService.extractUserIdFromAuthorization(authorizationHeader);
             if (userId != 0) {
                 request.setAttribute("UserId", userId);
             } else {
-                // 如果无法获取用户 ID，拒绝请求
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 response.getWriter().write("Unauthorized: Invalid token");
                 return;
             }
         } catch (Exception e) {
-            // 捕获异常并返回 401 未授权状态
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.getWriter().write("Unauthorized: Invalid token");
             return;

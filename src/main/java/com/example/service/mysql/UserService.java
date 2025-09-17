@@ -5,6 +5,7 @@ import com.example.constant.RedisPrefixConstant;
 import com.example.mapper.UserMapper;
 import com.example.model.mysql.User;
 import com.example.service.redis.RedisService;
+import com.example.service.security.JwtService; // 新增
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -13,8 +14,6 @@ import java.util.concurrent.TimeUnit;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.example.util.JwtUtil;
-
 @Service
 public class UserService {
     @Autowired
@@ -22,6 +21,9 @@ public class UserService {
 
     @Autowired
     private RedisService jedis;
+
+    @Autowired
+    private JwtService jwtService; // 注入 JwtService
 
     public int register(User user) {
         System.out.println("有顾客正在注册");
@@ -41,8 +43,8 @@ public class UserService {
             jedis.set("user:" + id + "ip", ipAddress);
             String result = (String) jedis.get("user:" + id+ "ip");
             System.out.println("用户" + id + "登录成功，IP地址为：" + result);
-            // 生成token
-            String token = JwtUtil.generateToken(String.valueOf(id));
+            // 生成token (改用 JwtService)
+            String token = jwtService.generateToken(id);
             System.out.println("用户" + id + "的token" + token);
             jedis.set(token, String.valueOf(id), 518400, TimeUnit.SECONDS);
             return token;
