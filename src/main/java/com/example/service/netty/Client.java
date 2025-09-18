@@ -12,8 +12,11 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Client {
+    private static final Logger log = LoggerFactory.getLogger(Client.class);
     private final String host;
     private final int port;
 
@@ -37,7 +40,7 @@ public class Client {
                             ch.pipeline().addLast(new SimpleChannelInboundHandler<String>() {
                                 @Override
                                 protected void channelRead0(ChannelHandlerContext ctx, String msg) throws Exception {
-                                    System.out.println("接收到信息："+msg);
+                                    log.info("接收到信息: {}", msg);
                                 }
                             });
                         }
@@ -47,22 +50,23 @@ public class Client {
             ChannelFuture channel = null;
             try {
                 channel = b.connect(host, port).sync();
-                System.out.println("连接成功");
+                log.info("连接成功 host={} port={}", host, port);
             } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
                 throw new RuntimeException(e);
             } catch(Exception e) {
-                System.out.println("无法连接到服务器，你和服务器肯定有个有问题哈哈");
+                log.error("无法连接到服务器 host={} port={}", host, port, e);
                 return;
             }
             while (sc.hasNextLine()) {
-                System.out.print("请输入您要发送给的用户：");
+                log.info("请输入您要发送给的用户(回车结束)：");
                 String port = sc.nextLine();
                 if(port.isEmpty()) break;
                 String line = sc.nextLine();
                 channel.channel().writeAndFlush(port+"|"+line);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("客户端运行异常", e);
         }
         finally {
             group.shutdownGracefully();

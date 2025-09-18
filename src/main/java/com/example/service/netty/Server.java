@@ -6,6 +6,7 @@ import io.netty.handler.timeout.IdleStateHandler;
 import org.springframework.stereotype.Component;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.SmartLifecycle;
 
 import com.example.handler.HttpServerHandler;
 import com.example.handler.JwtRequestHandler;
@@ -17,20 +18,22 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 
-import jakarta.annotation.PostConstruct;
-import jakarta.annotation.PreDestroy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Component
-public class Server {
+public class Server implements SmartLifecycle {
     private static final Logger log = LoggerFactory.getLogger(Server.class);
 
     @Value("${netty.port:8080}")
     private int port;
+
+    @Value("${netty.enabled:true}")
+    private boolean enabled;
 
     private final JwtService jwtService;
 
@@ -38,16 +41,20 @@ public class Server {
     private NioEventLoopGroup workerGroup;
     private Channel serverChannel;
     private final CompletableFuture<Void> startFuture = new CompletableFuture<>();
-    private volatile boolean started = false;
+    private final AtomicBoolean running = new AtomicBoolean(false);
 
     @Autowired
     public Server(JwtService jwtService) {
         this.jwtService = jwtService;
     }
 
-    @PostConstruct
+    @Override
     public void start() {
-        if (started) {
+        if (!enabled) {
+            log.warn("Netty Server 已禁用 (netty.enabled=false)");
+            return;
+        }
+        if (running.get()) {
             return;
         }
         bossGroup = new NioEventLoopGroup();
@@ -72,12 +79,12 @@ public class Server {
                     .childOption(ChannelOption.SO_KEEPALIVE, true)
                     .option(ChannelOption.SO_BACKLOG, 128);
 
-            log.info("Netty Server 正在绑定端口 {}...", port);
+            log.info("Netty Server 绑定端口 {} 中...", port);
             b.bind(port).addListener((ChannelFutureListener) future -> {
                 if (future.isSuccess()) {
                     serverChannel = future.channel();
-                    started = true;
-                    log.info("Netty Server 启动成功, 端口 {}", port);
+                    running.set(true);
+                    log.info("Netty Server 启动成功 端口 {}", port);
                     startFuture.complete(null);
                 } else {
                     log.error("Netty Server 启动失败", future.cause());
@@ -90,17 +97,20 @@ public class Server {
         }
     }
 
-    public boolean isStarted() {
-        return started && serverChannel != null && serverChannel.isActive();
-    }
-
-    public void awaitStarted(long timeout, TimeUnit unit) throws Exception {
-        startFuture.get(timeout, unit);
-    }
-
-    @PreDestroy
+    @Override
     public void stop() {
-        if (!started) {
+        // 同步关闭
+        internalStop(null);
+    }
+
+    @Override
+    public void stop(Runnable callback) {
+        internalStop(callback);
+    }
+
+    private void internalStop(Runnable callback) {
+        if (!running.get()) {
+            if (callback != null) callback.run();
             return;
         }
         log.info("Netty Server 正在关闭...");
@@ -109,12 +119,32 @@ public class Server {
                 serverChannel.close().syncUninterruptibly();
             }
         } catch (Exception e) {
-            log.warn("关闭 serverChannel 发生异常", e);
+            log.warn("关闭 serverChannel 异常", e);
         } finally {
             if (bossGroup != null) bossGroup.shutdownGracefully();
             if (workerGroup != null) workerGroup.shutdownGracefully();
-            started = false;
+            running.set(false);
             log.info("Netty Server 已关闭");
+            if (callback != null) callback.run();
         }
+    }
+
+    @Override
+    public boolean isRunning() {
+        return running.get() && serverChannel != null && serverChannel.isActive();
+    }
+
+    public void awaitStarted(long timeout, TimeUnit unit) throws Exception {
+        startFuture.get(timeout, unit);
+    }
+
+    @Override
+    public int getPhase() {
+        return 0; // 默认
+    }
+
+    @Override
+    public boolean isAutoStartup() {
+        return true;
     }
 }

@@ -1,67 +1,11 @@
 package com.example.util;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-
-public class JwtUtil {
-
-    private static final String SECRET_KEY = "2998568539";
-
-    public static String generateToken(String username) {
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("userId", username);
-        return Jwts.builder()
-                .setClaims(claims)
-                .setSubject(username)
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10)) // 10 hours
-                .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
-                .compact();
-    }
-
-    /**
-     * 提取 token 中的信息
-     * @param token token 字符串
-     * @return token 中的信息
-     */
-    public static Claims extractClaims(String token) {
-        // System.out.println("extractClaims");
-        return Jwts.parser()
-                // 通过密钥解析 token
-                .setSigningKey(SECRET_KEY)
-                // 获取 token 中的 body 部分
-                .parseClaimsJws(token)
-                .getBody();
-    }
-
-    public static boolean validateToken(String token, String username) {
-        return username.equals(extractClaims(token).getSubject()) && !isTokenExpired(token);
-    }
-
-    private static boolean isTokenExpired(String token) {
-        return extractClaims(token).getExpiration().before(new Date());
-    }
-
-    public static int validateTokenAndExtractUser(String authorizationHeader) {
-        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-            String jwt = authorizationHeader.substring(7);
-            // 解析JWT
-            Claims claims = JwtUtil.extractClaims(jwt);
-            String username=claims.get("userId", String.class);
-            Integer userId = Integer.valueOf(username);
-            return userId;
-        }
-        return 0;
-    }
-
-    public static void main(String[] args) {
-        String token = JwtUtil.generateToken("1");
-        System.out.println(token);
-        System.out.println(JwtUtil.validateTokenAndExtractUser(token));
-    }
+/**
+ * 旧版静态 JWT 工具类 (已弃用)。
+ * 请使用 {@link com.example.service.security.JwtService}.
+ */
+@Deprecated
+public final class JwtUtil {
+    private JwtUtil() {}
+    // 此类已废弃，无实现。
 }

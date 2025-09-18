@@ -11,6 +11,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.common.api.ApiResponse;
+import com.example.common.api.BusinessException;
+import com.example.common.api.ErrorCode;
 import com.example.model.mongo.MongoUser;
 import com.example.model.mysql.User;
 import com.example.service.mongo.MongoUserService;
@@ -51,8 +54,10 @@ public class UserController {
      */
     @ApiOperation(value = "获取用户信息")
     @GetMapping("/get")
-    public User getUserById(@RequestAttribute("UserId") int id) {
-        return userService.getUserById(id);
+    public ApiResponse<User> getUserById(@RequestAttribute("UserId") int id) {
+        User u = userService.getUserById(id);
+        if (u == null) throw new BusinessException(ErrorCode.NOT_FOUND, "用户不存在");
+        return ApiResponse.success(u);
     }
 
     /**
@@ -62,8 +67,10 @@ public class UserController {
      */
     @ApiOperation(value = "获取Mongo用户信息")
     @GetMapping("/mongo/{id}")
-    public MongoUser getMongoUserByUserId(@PathVariable(name = "id", required = true) int id) {
-        return mongoUserService.getUserByUserId(id);
+    public ApiResponse<MongoUser> getMongoUserByUserId(@PathVariable(name = "id") int id) {
+        MongoUser u = mongoUserService.getUserByUserId(id);
+        if (u == null) throw new BusinessException(ErrorCode.NOT_FOUND, "用户不存在");
+        return ApiResponse.success(u);
     }
 
     /**
@@ -74,9 +81,10 @@ public class UserController {
      */
     @ApiOperation(value = "登录")
     @PostMapping("/login")
-    public String login(@ApiParam("用户账号") @RequestParam int id, @ApiParam("密码") @RequestParam String password,HttpServletRequest request) {
-        System.out.println("用户"+id+"登录中...");
-        return userService.login(id, password,request);
+    public ApiResponse<String> login(@ApiParam("用户账号") @RequestParam int id, @ApiParam("密码") @RequestParam String password, HttpServletRequest request) {
+        String token = userService.login(id, password, request);
+        if (token == null || token.isEmpty()) throw new BusinessException(ErrorCode.LOGIN_FAIL, "账号或密码错误");
+        return ApiResponse.success(token);
     }
 
     /**
@@ -87,23 +95,24 @@ public class UserController {
      */
     @ApiOperation(value = "根据用户名和密码登录")
     @PostMapping("/loginByEmail")
-    public String loginByName(@ApiParam("用户名") @RequestParam String email, @ApiParam("密码") @RequestParam String password, HttpServletRequest request) {
-        System.out.println("邮箱为"+ email +"的用户登录中...");
+    public ApiResponse<String> loginByName(@ApiParam("用户名") @RequestParam String email, @ApiParam("密码") @RequestParam String password, HttpServletRequest request) {
         User user = userService.getUserByEmail(email);
-        return userService.login(user.getId(), password,request);
+        if (user == null) throw new BusinessException(ErrorCode.LOGIN_FAIL, "用户不存在");
+        String token = userService.login(user.getId(), password, request);
+        if (token == null || token.isEmpty()) throw new BusinessException(ErrorCode.LOGIN_FAIL, "账号或密码错误");
+        return ApiResponse.success(token);
     }
 
     @PostMapping("/validate")
-    public boolean validate(@RequestParam String token){
-        return jwtService.validate(token);
+    public ApiResponse<Boolean> validate(@RequestParam String token){
+        return ApiResponse.success(jwtService.validate(token));
     }
-    
+
     @ApiOperation(value = "退出登录")
     @PostMapping("/logout")
-    public boolean logout(@RequestAttribute("UserId") int id){
+    public ApiResponse<Boolean> logout(@RequestAttribute("UserId") int id){
         jedis.del("user:"+id);
-        System.out.println("用户"+id+"已退出登录");
-        return true;
+        return ApiResponse.success(true);
     }
 
     /**
@@ -114,28 +123,20 @@ public class UserController {
     @ApiOperation(value = "注册")
     @Transactional(rollbackFor = Exception.class)
     @PostMapping("/register")
-    public int register(@ApiParam("用户信息") @RequestBody User user) {
-        System.out.println("用户注册中...");
+    public ApiResponse<Integer> register(@ApiParam("用户信息") @RequestBody User user) {
+        int beforeId = user.getId();
         userService.register(user);
-        int id = user.getId();
+        int id = user.getId() == 0 ? beforeId : user.getId();
         MongoUser mongoUser = new MongoUser(id, null, null);
-        System.out.println(id+"用户注册成功！");
         if(!mongoUserService.register(mongoUser)){
-            throw new RuntimeException("MongoDB register failed");
+            throw new BusinessException(ErrorCode.REGISTER_FAIL, "MongoDB register failed");
         }
-        return id;
+        return ApiResponse.success(id);
     }
 
-    /**
-     * 添加群组
-     * @param id 用户 ID
-     * @param groupId 群组 ID
-     * @return 是否添加成功
-     */
     @ApiOperation(value = "添加群组")
     @PostMapping("/addgroup")
-    public boolean addGroup(@RequestAttribute("UserId") int id, @RequestParam int groupId) {
-        return mongoUserService.addGroup(id, groupId);
+    public ApiResponse<Boolean> addGroup(@RequestAttribute("UserId") int id, @RequestParam int groupId) {
+        return ApiResponse.success(mongoUserService.addGroup(id, groupId));
     }
-
 }

@@ -15,9 +15,12 @@ import com.example.model.mongo.MongoUser;
 import com.example.repository.MongoGroupRepository;
 import com.example.repository.MongoUserRepository;
 import com.example.service.mysql.GroupService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 public class MongoUserService {
+    private static final Logger log = LoggerFactory.getLogger(MongoUserService.class);
     private final MongoUserRepository mongoUserRepository;
     private final MongoGroupRepository mongoGroupRepository;
     private final UserMapper userMapper;
@@ -36,9 +39,9 @@ public class MongoUserService {
      * @return 是否注册成功
      */
     public boolean register(MongoUser user) {
-        System.out.println("正在MongoDB中注册用户：");
+        log.info("Mongo 注册用户 userId={}", user.getUserId());
         if (mongoUserRepository.findByUserId(user.getUserId()) != null) {
-            System.out.println("用户已存在");
+            log.warn("用户已存在 userId={}", user.getUserId());
             return false;
         }
         mongoUserRepository.save(user);
@@ -72,20 +75,19 @@ public class MongoUserService {
     @Transactional
     public boolean addFriend(int userId, int friendId) {
         if(userId == friendId){
-            System.out.println("不能添加自己为好友");
+            log.warn("不能添加自己为好友 userId={}", userId);
             return false;
         }
         MongoUser user = mongoUserRepository.findByUserId(userId);
         MongoUser friend = mongoUserRepository.findByUserId(friendId);
         if (user == null || friend == null) {
-            // 获取当前用户
-            System.out.println("来源"+user+"好友"+friend);
-            System.out.println("用户不存在");
+            log.warn("添加好友失败：用户不存在 src={} target={}", user, friend);
             return false;
         }
         if (user.addFriend(friendId) && friend.addFriend(userId)) {
-            mongoUserRepository.save(user); // 保存更改到数据库
-            mongoUserRepository.save(friend); // 保存对方更改到数据库
+            mongoUserRepository.save(user);
+            mongoUserRepository.save(friend);
+            log.info("添加好友成功 userId={} friendId={}", userId, friendId);
             return true;
         }
         return false;
@@ -102,12 +104,12 @@ public class MongoUserService {
         MongoUser user = mongoUserRepository.findByUserId(userId);
         MongoUser friend = mongoUserRepository.findByUserId(friendId);
         if (user == null || friend == null) {
-            // 获取当前用户
             return false;
         }
         if (user.delFriend(friendId) && friend.delFriend(userId)) {
-            mongoUserRepository.save(user); // 保存更改到数据库
-            mongoUserRepository.save(friend); // 保存对方更改到数据库
+            mongoUserRepository.save(user);
+            mongoUserRepository.save(friend);
+            log.info("删除好友成功 userId={} friendId={}", userId, friendId);
             return true;
         }
         return false;
@@ -119,12 +121,12 @@ public class MongoUserService {
      * @return 是否成功
      */
     public List<User> getFriends(int userId){
-        if(mongoUserRepository.findByUserId(userId) == null){
-            System.out.println("用户不存在");
+        MongoUser mongoUser = mongoUserRepository.findByUserId(userId);
+        if(mongoUser == null){
+            log.warn("用户不存在 userId={}", userId);
             return new ArrayList<>();
         }
-        MongoUser user = mongoUserRepository.findByUserId(userId);
-        List<Integer> friends = user.getFriends();
+        List<Integer> friends = mongoUser.getFriends();
         if(friends.isEmpty()){
             return new ArrayList<>();
         }
@@ -139,7 +141,7 @@ public class MongoUserService {
     public List<Group> getGroups(int userId) {
         MongoUser user = mongoUserRepository.findByUserId(userId);
         if(user == null){
-            System.out.println("用户不存在");
+            log.warn("用户不存在 userId={}", userId);
             return new ArrayList<>();
         }
         List<Integer> groups = user.getGroups();
@@ -159,13 +161,14 @@ public class MongoUserService {
     public boolean addGroup(int userId, int groupId) {
         MongoUser user = mongoUserRepository.findByUserId(userId);
         MongoGroup group = mongoGroupRepository.findByGroupId(groupId);
-        if (user == null) {
-            // 获取当前用户
+        if (user == null || group == null) {
+            log.warn("添加群组失败 userId={} groupId={} user/group缺失", userId, groupId);
             return false;
         }
         if (user.addGroup(groupId) && group.addMember(userId)) {
-            mongoUserRepository.save(user); // 保存更改到数据库
-            mongoGroupRepository.save(group); // 保存对方更改到数据库
+            mongoUserRepository.save(user);
+            mongoGroupRepository.save(group);
+            log.info("添加群组成功 userId={} groupId={}", userId, groupId);
             return true;
         }
         return false;

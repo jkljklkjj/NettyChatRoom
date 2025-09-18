@@ -63,6 +63,7 @@ public class SessionManager {
         ctx.channel().attr(GROUP_ID_KEY).set(groupIds);
         ctx.channel().attr(CLIENT_ID_KEY).set(clientId);
         groupIds.forEach(groupId -> {addToGroup(groupId.toString(), ctx.channel());});
+        logger.info("用户 {} 上线, 加入群组 {}", clientId, groupIds);
     }
 
     /**
@@ -70,7 +71,7 @@ public class SessionManager {
      */
     public static void addToGroup(String groupId, Channel channel) {
         groupChannelMap.computeIfAbsent(groupId, k -> new DefaultChannelGroup(channel.eventLoop())).add(channel);
-        logger.info("用户 {} 加入群组 {}", channel.id(), groupId);
+        logger.info("用户 {} 加入群组 {}", channel.attr(CLIENT_ID_KEY).get(), groupId);
     }
 
     /**
@@ -87,13 +88,15 @@ public class SessionManager {
         // 设置用户离线状态
         redisService.setBit(RedisPrefixConstant.USER_ONLINE_STATUS_KEY, Integer.valueOf(clientId), false);
         Channel channel = clientChannelMap.remove(clientId);
-        List<Integer> groupIds = channel.attr(GROUP_ID_KEY).get();
-        groupIds.forEach(groupId -> {removeFromGroup(groupId.toString(), channel);});
         if (channel != null) {
+            List<Integer> groupIds = channel.attr(GROUP_ID_KEY).get();
+            if (groupIds != null) {
+                groupIds.forEach(groupId -> {removeFromGroup(groupId.toString(), channel);});
+            }
             channel.close();
             logger.info("用户 {} 下线", clientId);
         } else {
-            logger.warn("用户 {} 不在线", clientId);
+            logger.warn("尝试下线但用户不在线 {}", clientId);
         }
     }
 
@@ -104,7 +107,7 @@ public class SessionManager {
         ChannelGroup group = groupChannelMap.get(groupId);
         if (group != null) {
             group.remove(channel);
-            logger.info("用户 {} 从群组 {} 移除", channel.id(), groupId);
+            logger.info("用户 {} 从群组 {} 移除", channel.attr(CLIENT_ID_KEY).get(), groupId);
             if (group.isEmpty()) {
                 groupChannelMap.remove(groupId);
                 logger.info("群组 {} 已清空", groupId);
@@ -119,22 +122,21 @@ public class SessionManager {
         return clientChannelMap.containsKey(clientId);
     }
 
-    public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
+    public void handlerAdded(ChannelHandlerContext ctx) {
         String clientId = ctx.channel().remoteAddress().toString();
-        System.out.println("客户端 " + clientId + " 已连接");
+        logger.info("客户端 {} 已连接", clientId);
     }
 
-    public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
+    public void handlerRemoved(ChannelHandlerContext ctx) {
         String clientId = ctx.channel().attr(CLIENT_ID_KEY).get();
         if (clientId != null) {
             remove(clientId);
-            System.out.println("客户端 " + clientId + " 已断开");
+            logger.info("客户端 {} 已断开", clientId);
         }
     }
 
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        System.out.println("客户端 " + ctx.channel().remoteAddress().toString() + " 出现异常");
-        cause.printStackTrace();
+        logger.error("客户端 {} 出现异常", ctx.channel().remoteAddress(), cause);
         ctx.close();
     }
 }
