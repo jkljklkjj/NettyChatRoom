@@ -26,10 +26,10 @@ public class SecurityConfig {
                     .requestMatchers(HttpMethod.POST, "user/register").permitAll()
                     .requestMatchers("/error").permitAll()
                     .anyRequest().permitAll();
-            })
-            .sessionManagement(sessionManagement ->
-                sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            );
+            });
+//            .sessionManagement(sessionManagement ->
+//                sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+//            );
 
         return http.build();
     }

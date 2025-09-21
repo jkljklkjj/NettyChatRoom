@@ -5,15 +5,14 @@ import java.util.List;
 import com.example.dto.FriendAddRequest;
 import com.example.dto.FriendIdRequest;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestAttribute;
 
-import com.example.constant.SessionConstant;
 import com.example.model.mysql.User;
 import com.example.service.mongo.MongoUserService;
 import com.example.service.mysql.UserService;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import jakarta.servlet.http.HttpSession;
 
 @Api(tags = "好友管理")
 @RestController
@@ -35,11 +34,10 @@ public class FriendController {
      */
     @ApiOperation(value = "添加好友")
     @PostMapping("/add")
-    public boolean addFriend(HttpSession session, @RequestBody FriendAddRequest friendAddRequest) {
-        Integer id = (Integer) session.getAttribute(SessionConstant.USER_ID);
-        if(id == null) return false;
-        int friendId = friendAddRequest.getFriendId();
-        return mongoUserService.addFriend(id, friendId);
+    public boolean addFriend(@RequestAttribute(value = "UserId", required = false) Integer userId,
+                              @RequestBody FriendAddRequest friendAddRequest) {
+        if (userId == null) return false;
+        return mongoUserService.addFriend(userId, friendAddRequest.getFriendId());
     }
 
     /**
@@ -48,10 +46,10 @@ public class FriendController {
      */
     @ApiOperation(value = "删除好友")
     @PostMapping("/del")
-    public boolean delFriend(HttpSession session, @RequestBody FriendIdRequest body) {
-        Integer id = (Integer) session.getAttribute(SessionConstant.USER_ID);
-        if(id == null) return false;
-        return mongoUserService.delFriend(id, body.getFriendId());
+    public boolean delFriend(@RequestAttribute(value = "UserId", required = false) Integer userId,
+                              @RequestBody FriendIdRequest body) {
+        if (userId == null) return false;
+        return mongoUserService.delFriend(userId, body.getFriendId());
     }
 
     /**
@@ -60,10 +58,9 @@ public class FriendController {
      */
     @ApiOperation(value = "获取好友列表")
     @PostMapping("/get")
-    public List<User> getFriend(HttpSession session) {
-        Integer id = (Integer) session.getAttribute(SessionConstant.USER_ID);
-        if(id == null) return List.of();
-        return mongoUserService.getFriends(id);
+    public List<User> getFriend(@RequestAttribute(value = "UserId", required = false) Integer userId) {
+        if (userId == null) return List.of();
+        return mongoUserService.getFriends(userId);
     }
 
 }

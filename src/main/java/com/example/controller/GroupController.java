@@ -3,14 +3,9 @@ package com.example.controller;
 import java.util.List;
 
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestAttribute;
 
-import com.example.constant.SessionConstant;
 import com.example.dto.AddMemberRequest;
 import com.example.dto.GroupIdRequest;
 import com.example.model.mongo.MongoGroup;
@@ -22,8 +17,6 @@ import com.example.service.mysql.GroupService;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-
-import jakarta.servlet.http.HttpSession;
 
 /**
  * 群聊相关接口
@@ -51,12 +44,12 @@ public class GroupController {
     @ApiOperation(value = "注册群聊")
     @Transactional(rollbackFor = Exception.class)
     @RequestMapping("/register")
-    public int register(HttpSession session, @RequestParam Group group) {
-        Integer id = (Integer) session.getAttribute(SessionConstant.USER_ID);
-        if(id == null) throw new RuntimeException("未登录");
+    public int register(@RequestAttribute(value = "UserId", required = false) Integer userId,
+                        @RequestParam Group group) {
+        if (userId == null) throw new RuntimeException("未登录");
         int groupId = groupService.register(group);
-        MongoGroup mongoGroup = new MongoGroup(groupId, id);
-        if(!mongoGroupService.register(mongoGroup)){
+        MongoGroup mongoGroup = new MongoGroup(groupId, userId);
+        if (!mongoGroupService.register(mongoGroup)) {
             throw new RuntimeException("MongoDB register failed");
         }
         return groupId;
@@ -79,10 +72,9 @@ public class GroupController {
      */
     @ApiOperation(value = "获取用户群聊列表")
     @GetMapping("/get")
-    public List<Group> getGroup(HttpSession session) {
-        Integer id = (Integer) session.getAttribute(SessionConstant.USER_ID);
-        if(id == null) throw new RuntimeException("未登录");
-        return mongoGroupService.getGroups(id);
+    public List<Group> getGroup(@RequestAttribute(value = "UserId", required = false) Integer userId) {
+        if (userId == null) throw new RuntimeException("未登录");
+        return mongoGroupService.getGroups(userId);
     }
 
     /**
@@ -107,7 +99,7 @@ public class GroupController {
     public boolean addMember(@RequestBody AddMemberRequest request) {
         MongoGroup mongoGroup = mongoGroupService.getGroup(request.getGroupId());
         MongoUser user = mongoUserService.getUserByUserId(request.getUserId());
-        if(mongoGroup == null || user == null){
+        if (mongoGroup == null || user == null) {
             return false;
         }
         return mongoGroupService.addMember(mongoGroup.getGroupId(), user.getUserId());
@@ -118,17 +110,17 @@ public class GroupController {
      * @return 是否成功
      */
     @ApiOperation(value = "删除群聊")
-    @PostMapping("del")
-    public boolean delGroup(HttpSession session, @RequestBody GroupIdRequest req) {
-        Integer id = (Integer) session.getAttribute(SessionConstant.USER_ID);
-        if(id == null) return false;
+    @PostMapping("/del")
+    public boolean delGroup(@RequestAttribute(value = "UserId", required = false) Integer userId,
+                             @RequestBody GroupIdRequest req) {
+        if (userId == null) return false;
         int groupId = req.getGroupId();
         MongoGroup mongoGroup = mongoGroupService.getGroup(groupId);
-        if(mongoGroup == null || mongoGroup.getAdmin() != id){
+        if (mongoGroup == null || mongoGroup.getAdmin() != userId) {
             return false;
         }
         int group = groupService.delGroup(groupId);
-        if(group == 0){
+        if (group == 0) {
             return false;
         }
         return mongoGroupService.delGroup(groupId);

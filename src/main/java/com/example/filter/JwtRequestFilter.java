@@ -1,11 +1,12 @@
 package com.example.filter;
 
 import java.io.IOException;
+import java.util.Set;
 
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.example.service.security.JwtService; // 新增
+import com.example.service.security.JwtService;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -16,46 +17,50 @@ import jakarta.servlet.http.HttpServletResponse;
 public class JwtRequestFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
 
+    private static final Set<String> WHITELIST = Set.of(
+            "/user/login",
+            "/user/register",
+            "/user/loginByEmail",
+            "/v2/api-docs",
+            "/swagger-resources",
+            "/swagger-ui.html",
+            "/swagger-ui/index.html",
+            "/doc.html",
+            "/error"
+    );
+
     public JwtRequestFilter(JwtService jwtService) {
         this.jwtService = jwtService;
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
-            HttpServletResponse response, FilterChain filterChain)
+                                    HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        System.out.println("Request URL: " + request.getRequestURL());
-        int serverPort = request.getServerPort();
-        if (serverPort != 8088) {
+        String uri = request.getRequestURI();
+        // Swagger 资源前缀与静态资源直接放行
+        if (isWhitelisted(uri)) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        String requestURI = request.getRequestURI();
-        if (requestURI.endsWith("/user/login") || requestURI.endsWith("/user/register")) {
-            filterChain.doFilter(request, response);
-            System.out.println("用户登录或注册请求，放行");
-            return;
-        }
-        // 获取请求头中的 Authorization 字段
-        final String authorizationHeader = request.getHeader("Authorization");
-
-        try {
-            int userId = jwtService.extractUserIdFromAuthorization(authorizationHeader);
-            if (userId != 0) {
-                request.setAttribute("UserId", userId);
-            } else {
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                response.getWriter().write("Unauthorized: Invalid token");
-                return;
-            }
-        } catch (Exception e) {
+        String authorizationHeader = request.getHeader("Authorization");
+        int userId = jwtService.extractUserIdFromAuthorization(authorizationHeader);
+        if (userId == 0) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.getWriter().write("Unauthorized: Invalid token");
+            response.setContentType("application/json;charset=UTF-8");
+            response.getWriter().write("{\"code\":401,\"msg\":\"Unauthorized or invalid token\"}");
             return;
         }
-
+        request.setAttribute("UserId", userId);
         filterChain.doFilter(request, response);
+    }
+
+    private boolean isWhitelisted(String uri) {
+        if (uri == null) return true; // 容错
+        if (WHITELIST.contains(uri)) return true;
+        // 以 swagger-resources、/webjars、/swagger-ui、/v3/api-docs 等前缀的也放行
+        return uri.startsWith("/swagger") || uri.startsWith("/webjars") || uri.startsWith("/v3/api-docs");
     }
 }
