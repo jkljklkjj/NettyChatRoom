@@ -9,10 +9,6 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpHeaderNames;
-import io.netty.handler.codec.http.multipart.Attribute;
-import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder;
-import io.netty.handler.codec.http.multipart.InterfaceHttpData;
-import io.netty.handler.codec.http.multipart.MixedFileUpload;
 import io.netty.util.CharsetUtil;
 
 public class HttpServerHandler extends SimpleChannelInboundHandler<Object> {
@@ -33,28 +29,6 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<Object> {
                         handler.handle(jsonMsg, ctx);
                     } else{
                         throw new Exception("没有找到对应业务的处理器"+type);
-                    }
-                } else if (contentType.startsWith("multipart/form-data")) {
-                    HttpPostRequestDecoder decoder = new HttpPostRequestDecoder(request);
-                    decoder.offer(request);
-
-                    while (decoder.hasNext()) {
-                        InterfaceHttpData data = decoder.next();
-                        if (data != null) {
-                            try {
-                                if (data.getHttpDataType() == InterfaceHttpData.HttpDataType.Attribute) {
-                                    Attribute attribute = (Attribute) data;
-                                    System.out.println("Attribute: " + attribute.getName() + " = " + attribute.getValue());
-                                } else if (data.getHttpDataType() == InterfaceHttpData.HttpDataType.FileUpload) {
-                                    MixedFileUpload fileUpload = (MixedFileUpload) data;
-                                    System.out.println("File: " + fileUpload.getFilename() + " = " + fileUpload.getString(CharsetUtil.UTF_8));
-                                }
-                            } catch (IOException e) {
-                                throw new RuntimeException(e);
-                            } finally {
-                                data.release();
-                            }
-                        }
                     }
                 } else {
                     String jsonBody = request.content().toString(CharsetUtil.UTF_8);

@@ -5,11 +5,14 @@ import java.util.List;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestAttribute;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.constant.SessionConstant;
+import com.example.dto.AddMemberRequest;
+import com.example.dto.GroupIdRequest;
 import com.example.model.mongo.MongoGroup;
 import com.example.model.mongo.MongoUser;
 import com.example.model.mysql.Group;
@@ -19,6 +22,8 @@ import com.example.service.mysql.GroupService;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+
+import jakarta.servlet.http.HttpSession;
 
 /**
  * 群聊相关接口
@@ -46,7 +51,9 @@ public class GroupController {
     @ApiOperation(value = "注册群聊")
     @Transactional(rollbackFor = Exception.class)
     @RequestMapping("/register")
-    public int register(@RequestAttribute("UserId") int id, @RequestParam Group group) {
+    public int register(HttpSession session, @RequestParam Group group) {
+        Integer id = (Integer) session.getAttribute(SessionConstant.USER_ID);
+        if(id == null) throw new RuntimeException("未登录");
         int groupId = groupService.register(group);
         MongoGroup mongoGroup = new MongoGroup(groupId, id);
         if(!mongoGroupService.register(mongoGroup)){
@@ -68,12 +75,13 @@ public class GroupController {
 
     /**
      * 获取群聊列表
-     * @param id 用户 ID
      * @return 群聊列表
      */
     @ApiOperation(value = "获取用户群聊列表")
     @GetMapping("/get")
-    public List<Group> getGroup(@RequestAttribute("UserId") int id) {
+    public List<Group> getGroup(HttpSession session) {
+        Integer id = (Integer) session.getAttribute(SessionConstant.USER_ID);
+        if(id == null) throw new RuntimeException("未登录");
         return mongoGroupService.getGroups(id);
     }
 
@@ -91,16 +99,14 @@ public class GroupController {
 
     /**
      * 群聊添加成员
-     * @param groupId 群聊ID
-     * @param userId 用户ID
      * @return 是否成功
      */
     @ApiOperation(value = "群聊添加成员")
     @Transactional(rollbackFor = Exception.class)
     @PostMapping("/addMember")
-    public boolean addMember(int groupId, int userId) {
-        MongoGroup mongoGroup = mongoGroupService.getGroup(groupId);
-        MongoUser user = mongoUserService.getUserByUserId(userId);
+    public boolean addMember(@RequestBody AddMemberRequest request) {
+        MongoGroup mongoGroup = mongoGroupService.getGroup(request.getGroupId());
+        MongoUser user = mongoUserService.getUserByUserId(request.getUserId());
         if(mongoGroup == null || user == null){
             return false;
         }
@@ -109,17 +115,18 @@ public class GroupController {
 
     /**
      * 删除群聊
-     * @param id 群聊ID
      * @return 是否成功
      */
     @ApiOperation(value = "删除群聊")
     @PostMapping("del")
-    public boolean delGroup(@RequestAttribute("UserId") int id,@RequestParam int groupId) {
+    public boolean delGroup(HttpSession session, @RequestBody GroupIdRequest req) {
+        Integer id = (Integer) session.getAttribute(SessionConstant.USER_ID);
+        if(id == null) return false;
+        int groupId = req.getGroupId();
         MongoGroup mongoGroup = mongoGroupService.getGroup(groupId);
         if(mongoGroup == null || mongoGroup.getAdmin() != id){
             return false;
         }
-
         int group = groupService.delGroup(groupId);
         if(group == 0){
             return false;

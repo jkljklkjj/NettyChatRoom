@@ -2,6 +2,7 @@ package com.example.common.api;
 
 public enum ErrorCode {
     SUCCESS(0, "OK"),
+    UNAUTHORIZED(401, "未授权"),
     VALIDATION_ERROR(1001, "参数校验失败"),
     AUTH_FAILED(1002, "认证失败"),
     NOT_FOUND(1003, "资源不存在"),

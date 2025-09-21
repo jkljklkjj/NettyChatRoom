@@ -19,14 +19,9 @@ call :checkExist "Redis 可执行文件" "%REDIS_EXE%" || goto :end
 echo.
 echo 正在分别在三个新窗口启动: Kafka / MongoDB / Redis ...
 
-REM =============== 启动 Kafka ===============
-start "Kafka" cmd /c call "%KAFKA_START%" ^&^& echo Kafka 进程已退出 & pause
-
-REM =============== 启动 MongoDB ===============
-start "MongoDB" cmd /c call "%MONGO_START%" ^&^& echo MongoDB 进程已退出 & pause
-
-REM =============== 启动 Redis ===============
-start "Redis" cmd /c "%REDIS_EXE%" ^&^& echo Redis 进程已退出 & pause
+start "Kafka"   cmd /k call "%KAFKA_START%"
+start "MongoDB" cmd /k call "%MONGO_START%"
+start "Redis"   cmd /k "%REDIS_EXE%"
 
 echo 所有启动命令已发出，请查看各自窗口日志。
 

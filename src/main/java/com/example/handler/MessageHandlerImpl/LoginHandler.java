@@ -4,8 +4,9 @@ import com.alibaba.fastjson.JSONObject;
 import com.example.handler.MessageHandler;
 import com.example.handler.SessionManager;
 
+import com.example.service.redis.RedisService;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.http.HttpResponseStatus;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -15,15 +16,17 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class LoginHandler implements MessageHandler {
+
+    @Autowired
+    private RedisService redisService;
+
     @Override
     public void handle(JSONObject jsonMsg, ChannelHandlerContext ctx) {
-        /*
-         * 要求信息：
-         * clientId: 通过token和redis获取的客户端的ID
-         * token需要通过header获取
-         */
         // TODO 上线时拉取所有离线收到的消息
-        String clientId = jsonMsg.getString("UserId");
+        String token = jsonMsg.getString("targetClientId");
+        String clientId = redisService.get(token);
+        // netty保存session用户id
+        ctx.channel().attr(SessionManager.CLIENT_ID_KEY).set(clientId);
         SessionManager.add(clientId, ctx);
     }
 

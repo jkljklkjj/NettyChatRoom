@@ -59,6 +59,7 @@ public class JwtService {
 
     /** 解析 Authorization 头，自动剥离前缀 */
     public int extractUserIdFromAuthorization(String authorizationHeader) {
+        // todo 用redis存储解析结果
         String token = resolveToken(authorizationHeader);
         if (token == null) return 0;
         return extractUserId(token);
