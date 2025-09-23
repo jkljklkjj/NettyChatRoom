@@ -6,6 +6,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.RequestAttribute;
 
+import com.example.annotation.RequireUserId;
+import com.example.common.api.ApiResponse;
 import com.example.dto.AddMemberRequest;
 import com.example.dto.GroupIdRequest;
 import com.example.model.mongo.MongoGroup;
@@ -42,17 +44,15 @@ public class GroupController {
      * @return 是否成功
      */
     @ApiOperation(value = "注册群聊")
+    @RequireUserId
     @Transactional(rollbackFor = Exception.class)
     @RequestMapping("/register")
-    public int register(@RequestAttribute(value = "UserId", required = false) Integer userId,
-                        @RequestParam Group group) {
-        if (userId == null) throw new RuntimeException("未登录");
+    public ApiResponse<Integer> register(@RequestAttribute(value = "UserId", required = false) Integer userId,
+                                          @RequestParam Group group) {
         int groupId = groupService.register(group);
         MongoGroup mongoGroup = new MongoGroup(groupId, userId);
-        if (!mongoGroupService.register(mongoGroup)) {
-            throw new RuntimeException("MongoDB register failed");
-        }
-        return groupId;
+        mongoGroupService.register(mongoGroup);
+        return ApiResponse.success(groupId);
     }
 
     /**
@@ -71,9 +71,9 @@ public class GroupController {
      * @return 群聊列表
      */
     @ApiOperation(value = "获取用户群聊列表")
+    @RequireUserId
     @GetMapping("/get")
     public List<Group> getGroup(@RequestAttribute(value = "UserId", required = false) Integer userId) {
-        if (userId == null) throw new RuntimeException("未登录");
         return mongoGroupService.getGroups(userId);
     }
 
@@ -110,10 +110,10 @@ public class GroupController {
      * @return 是否成功
      */
     @ApiOperation(value = "删除群聊")
+    @RequireUserId
     @PostMapping("/del")
     public boolean delGroup(@RequestAttribute(value = "UserId", required = false) Integer userId,
                              @RequestBody GroupIdRequest req) {
-        if (userId == null) return false;
         int groupId = req.getGroupId();
         MongoGroup mongoGroup = mongoGroupService.getGroup(groupId);
         if (mongoGroup == null || mongoGroup.getAdmin() != userId) {

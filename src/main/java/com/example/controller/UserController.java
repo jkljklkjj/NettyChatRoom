@@ -1,5 +1,6 @@
 package com.example.controller;
 
+import com.example.annotation.RequireUserId;
 import com.example.dto.LoginRequest;
 import com.example.dto.EmailLoginRequest;
 import com.example.dto.TokenValidateRequest;
@@ -44,12 +45,14 @@ public class UserController {
     }
 
     @ApiOperation(value = "获取用户信息")
+    @RequireUserId
     @GetMapping("/get")
     public ApiResponse<User> getUserById(@RequestAttribute(value = "UserId", required = false) Integer userId) {
-        if (userId == null) throw new BusinessException(ErrorCode.UNAUTHORIZED, "未登录");
-        User u = userService.getUserById(userId);
-        if (u == null) throw new BusinessException(ErrorCode.NOT_FOUND, "用户不存在");
-        return ApiResponse.success(u);
+        User user = userService.getUserById(userId);
+        if (user == null) {
+            return ApiResponse.failure(ErrorCode.LOGIN_FAIL,"用户不存在");
+        }
+        return ApiResponse.success(user);
     }
 
     @ApiOperation(value = "获取Mongo用户信息")
@@ -86,6 +89,7 @@ public class UserController {
     }
 
     @ApiOperation(value = "退出登录")
+    @RequireUserId
     @PostMapping("/logout")
     public ApiResponse<Boolean> logout(@RequestHeader(name = "Authorization", required = false) String authorization,
                                        @RequestAttribute(value = "UserId", required = false) Integer userId) {
@@ -95,7 +99,6 @@ public class UserController {
                 jedis.del(token);
             }
         }
-        if (userId == null) return ApiResponse.success(true);
         return ApiResponse.success(true);
     }
 
@@ -103,6 +106,7 @@ public class UserController {
     @Transactional(rollbackFor = Exception.class)
     @PostMapping("/register")
     public ApiResponse<Integer> register(@ApiParam("用户信息") @RequestBody User user) {
+        // 向mysql和MongoDB中注册用户
         int beforeId = user.getId();
         userService.register(user);
         int id = user.getId() == 0 ? beforeId : user.getId();
@@ -114,10 +118,10 @@ public class UserController {
     }
 
     @ApiOperation(value = "添加群组")
+    @RequireUserId
     @PostMapping("/addgroup")
     public ApiResponse<Boolean> addGroup(@RequestAttribute(value = "UserId", required = false) Integer userId,
                                           @RequestBody AddGroupRequest request) {
-        if (userId == null) throw new BusinessException(ErrorCode.UNAUTHORIZED, "未登录");
         return ApiResponse.success(mongoUserService.addGroup(userId, request.getGroupId()));
     }
 }

@@ -2,6 +2,9 @@ package com.example.controller;
 
 import java.util.List;
 
+import com.example.annotation.RequireUserId;
+import com.example.common.api.ApiResponse;
+import com.example.common.api.ErrorCode;
 import com.example.dto.FriendAddRequest;
 import com.example.dto.FriendIdRequest;
 import org.springframework.web.bind.annotation.*;
@@ -33,11 +36,12 @@ public class FriendController {
      * @return 是否添加成功
      */
     @ApiOperation(value = "添加好友")
+    @RequireUserId
     @PostMapping("/add")
-    public boolean addFriend(@RequestAttribute(value = "UserId", required = false) Integer userId,
-                              @RequestBody FriendAddRequest friendAddRequest) {
-        if (userId == null) return false;
-        return mongoUserService.addFriend(userId, friendAddRequest.getFriendId());
+    public ApiResponse<Boolean> addFriend(@RequestAttribute(value = "UserId", required = false) Integer userId,
+                                           @RequestBody FriendAddRequest friendAddRequest) {
+        boolean result = mongoUserService.addFriend(userId, friendAddRequest.getFriendId());
+        return ApiResponse.success(result);
     }
 
     /**
@@ -45,11 +49,12 @@ public class FriendController {
      * @return 是否删除成功
      */
     @ApiOperation(value = "删除好友")
+    @RequireUserId
     @PostMapping("/del")
-    public boolean delFriend(@RequestAttribute(value = "UserId", required = false) Integer userId,
-                              @RequestBody FriendIdRequest body) {
-        if (userId == null) return false;
-        return mongoUserService.delFriend(userId, body.getFriendId());
+    public ApiResponse<Boolean> delFriend(@RequestAttribute(value = "UserId", required = false) Integer userId,
+                                           @RequestBody FriendIdRequest body) {
+        boolean result = mongoUserService.delFriend(userId, body.getFriendId());
+        return ApiResponse.success(result);
     }
 
     /**
@@ -57,10 +62,11 @@ public class FriendController {
      * @return 好友列表
      */
     @ApiOperation(value = "获取好友列表")
+    @RequireUserId
     @PostMapping("/get")
-    public List<User> getFriend(@RequestAttribute(value = "UserId", required = false) Integer userId) {
-        if (userId == null) return List.of();
-        return mongoUserService.getFriends(userId);
+    public ApiResponse<List<User>> getFriend(@RequestAttribute(value = "UserId", required = false) Integer userId) {
+        List<User> friends = mongoUserService.getFriends(userId);
+        return ApiResponse.success(friends);
     }
 
 }
