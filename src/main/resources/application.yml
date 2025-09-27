@@ -35,19 +35,22 @@ spring:
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    consumer:
+      group-id: chat-group
 mybatis-plus:
   mapper-locations: classpath:mapper/*.xml
   type-aliases-package: com.example.mapper
   configuration:
     map-underscore-to-camel-case: true
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
-#logging:
-#  level:
-#    org:
+logging:
+  level:
+    org:
 #      springframework: Error
 #      apache:
 #        ibatis: DEBUG
 #      mybatis: DEBUG
+        apache.kafka: warn
 #    com:
 #      example:
 #        mapper: debug

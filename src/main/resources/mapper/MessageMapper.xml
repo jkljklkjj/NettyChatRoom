@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mapper.MessageMapper">
+    <insert id="insertMessage" parameterType="com.example.model.mysql.Message">
+        INSERT INTO messages (sender_id, receiver_id, message, timestamp, is_received)
+        VALUES (#{senderId}, #{receiverId}, #{message}, #{timestamp}, false)
+    </insert>
+
+    <select id="getMessagesBySender" parameterType="string" resultType="com.example.model.mysql.Message">
+        SELECT * FROM messages WHERE sender_id = #{sender}
+    </select>
+
+    <select id="getOfflineMessages" resultType="com.example.model.mysql.Message">
+        SELECT * FROM messages WHERE receiver_id = #{target} and is_received = false limit #{limit};
+    </select>
+
+    <update id="markMessagesAsReceived" parameterType="java.util.List">
+        UPDATE messages
+        SET is_received = true, receive_time = current_time
+        WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+</mapper>
