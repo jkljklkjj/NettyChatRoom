@@ -1,12 +1,24 @@
 package com.example.model.mysql;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.util.Date;
 
 public class Message {
+    @JsonIgnore
+    private String id;//唯一标识
     private String senderId;//发送者账号
     private String message;//消息内容
     private String receiverId;//接收者账号
     private Date timestamp;//时间戳，改为Date类型
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public String getSenderId() {
         return senderId;

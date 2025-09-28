@@ -29,4 +29,9 @@ public class ServiceConstant {
      * 群聊服务
      */
     public static final String GROUP_CHAT = "groupChat";
+
+    /**
+     * 心跳服务
+     */
+    public static final String HEARTBEAT = "heartbeat";
 }

@@ -25,6 +25,7 @@ public class MessageHandlerFactory {
             case ServiceConstant.LOGIN -> applicationContext.getBean(LoginHandler.class);
             case ServiceConstant.LOGOUT -> new LogoutHandler();
             case ServiceConstant.CHECK -> new CheckHandler();
+            case ServiceConstant.HEARTBEAT -> new HeartbeatHandler();
             default -> null;
         };
     }

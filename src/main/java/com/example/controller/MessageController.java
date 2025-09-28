@@ -25,7 +25,7 @@ public class MessageController {
         int limit = 10;
         List<Message> offlineMessages = messageService.getOfflineMessages(userId, limit);
         if (!offlineMessages.isEmpty()) {
-            List<String> ids = offlineMessages.stream().map(Message::getSenderId).collect(Collectors.toList());
+            List<String> ids = offlineMessages.stream().map(Message::getId).collect(Collectors.toList());
             messageService.markMessagesAsReceived(ids);
         }
         System.out.println(offlineMessages);
