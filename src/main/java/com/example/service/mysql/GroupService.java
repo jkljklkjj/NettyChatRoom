@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.mapper.GroupMapper;
 import com.example.model.mysql.Group;
@@ -18,6 +19,7 @@ public class GroupService {
      * @param group 群聊信息
      * @return id 自动生成的群聊ID
      */
+    @Transactional
     public int register(Group group) {
         return groupMapper.register(group);
     }
@@ -45,6 +47,7 @@ public class GroupService {
      * @param id 群聊的ID
      * @return 群聊的信息
      */
+    @Transactional
     public int delGroup(int id) {
         return groupMapper.delGroup(id);
     }

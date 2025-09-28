@@ -14,6 +14,7 @@ import java.util.concurrent.TimeUnit;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.transaction.annotation.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,6 +33,7 @@ public class UserService {
     @Autowired
     private PasswordEncoder passwordEncoder; // 注入密码加密器
 
+    @Transactional
     public int register(User user) {
         log.info("注册用户: username={} id={}", user.getUsername(), user.getId());
         // 加密密码（若尚未加密）
