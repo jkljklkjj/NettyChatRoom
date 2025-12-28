@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.example.annotation.RequireUserId;
 import com.example.common.api.ApiResponse;
-import com.example.common.api.ErrorCode;
+import com.example.common.api.StatusCode;
 import com.example.dto.FriendAddRequest;
 import com.example.dto.FriendIdRequest;
 import org.springframework.web.bind.annotation.*;

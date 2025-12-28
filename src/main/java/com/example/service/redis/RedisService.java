@@ -1,5 +1,6 @@
 package com.example.service.redis;
 
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,26 +14,33 @@ public class RedisService {
     private RedisTemplate<String, String> redisTemplate;
 
     public void set(String key, String value) {
+        Objects.requireNonNull(key, "Key cannot be null");
         redisTemplate.opsForValue().set(key, value);
     }
 
     public void set(String key, String value, long timeout, TimeUnit unit) {
+        Objects.requireNonNull(key, "Key cannot be null");
+        Objects.requireNonNull(unit, "TimeUnit cannot be null");
         redisTemplate.opsForValue().set(key, value, timeout, unit);
     }
 
     public void set(String key, String value, long timeout) {
+        Objects.requireNonNull(key, "Key cannot be null");
         redisTemplate.opsForValue().set(key, value, timeout, TimeUnit.MILLISECONDS);
     }
 
     public String get(String key) {
-        return (String) redisTemplate.opsForValue().get(key);
+        Objects.requireNonNull(key, "Key cannot be null");
+        return redisTemplate.opsForValue().get(key);
     }
 
     public boolean exists(String key) {
+        Objects.requireNonNull(key, "Key cannot be null");
         return redisTemplate.hasKey(key);
     }
 
     public void del(String key) {
+        Objects.requireNonNull(key, "Key cannot be null");
         redisTemplate.delete(key);
     }
 
@@ -43,10 +51,13 @@ public class RedisService {
      * @param value 位图值
      */
     public void setBit(String key, long offset, boolean value) {
+        Objects.requireNonNull(key, "Key cannot be null");
         redisTemplate.opsForValue().setBit(key, offset, value);
     }
 
     public boolean getBit(String key, long offset) {
-        return redisTemplate.opsForValue().getBit(key, offset);
+        Objects.requireNonNull(key, "Key cannot be null");
+        Boolean result = redisTemplate.opsForValue().getBit(key, offset);
+        return result != null && result;
     }
 }

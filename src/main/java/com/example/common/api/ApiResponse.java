@@ -16,23 +16,24 @@ public class ApiResponse<T> {
     }
 
     public static <T> ApiResponse<T> success(T data) {
-        return new ApiResponse<>(ErrorCode.SUCCESS.getCode(), ErrorCode.SUCCESS.getMessage(), data);
+        return new ApiResponse<>(StatusCode.SUCCESS.getCode(), StatusCode.SUCCESS.getMessage(), data);
     }
 
     public static <T> ApiResponse<T> successMsg(String msg) {
-        return new ApiResponse<>(ErrorCode.SUCCESS.getCode(), msg, null);
+        return new ApiResponse<>(StatusCode.SUCCESS.getCode(), msg, null);
     }
 
-    public static <T> ApiResponse<T> failure(ErrorCode errorCode) {
+    public static <T> ApiResponse<T> failure(StatusCode errorCode) {
         return new ApiResponse<>(errorCode.getCode(), errorCode.getMessage(), null);
     }
 
-    public static <T> ApiResponse<T> failure(ErrorCode errorCode, String overrideMessage) {
+    public static <T> ApiResponse<T> failure(StatusCode errorCode, String overrideMessage) {
         return new ApiResponse<>(errorCode.getCode(), overrideMessage, null);
     }
 
     public int getCode() { return code; }
     public void setCode(int code) { this.code = code; }
+    public void setCode(StatusCode code) { this.code = code.getCode(); } 
     public String getMessage() { return message; }
     public void setMessage(String message) { this.message = message; }
     public T getData() { return data; }

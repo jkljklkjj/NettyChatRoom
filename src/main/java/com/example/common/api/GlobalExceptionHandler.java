@@ -24,14 +24,14 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiResponse<Void> handleValidation(Exception ex) {
         log.debug("参数校验失败: {}", ex.getMessage());
-        return ApiResponse.failure(ErrorCode.VALIDATION_ERROR, ex.getMessage());
+        return ApiResponse.failure(StatusCode.VALIDATION_ERROR, ex.getMessage());
     }
 
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ApiResponse<Void> handleOther(Exception ex) {
         log.error("未处理异常", ex);
-        return ApiResponse.failure(ErrorCode.SERVER_ERROR);
+        return ApiResponse.failure(StatusCode.SERVER_ERROR);
     }
 }
 

@@ -1,18 +1,18 @@
 package com.example.common.api;
 
 public class BusinessException extends RuntimeException {
-    private final ErrorCode errorCode;
+    private final StatusCode errorCode;
 
-    public BusinessException(ErrorCode errorCode) {
+    public BusinessException(StatusCode errorCode) {
         super(errorCode.getMessage());
         this.errorCode = errorCode;
     }
 
-    public BusinessException(ErrorCode errorCode, String detail) {
+    public BusinessException(StatusCode errorCode, String detail) {
         super(detail);
         this.errorCode = errorCode;
     }
 
-    public ErrorCode getErrorCode() { return errorCode; }
+    public StatusCode getErrorCode() { return errorCode; }
 }
 

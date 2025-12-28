@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import com.example.common.api.ApiResponse;
 import com.example.common.api.BusinessException;
-import com.example.common.api.ErrorCode;
+import com.example.common.api.StatusCode;
 import com.example.model.mongo.MongoUser;
 import com.example.model.mysql.User;
 import com.example.service.mongo.MongoUserService;
@@ -50,7 +50,7 @@ public class UserController {
     public ApiResponse<User> getUserById(@RequestAttribute(value = "UserId", required = false) Integer userId) {
         User user = userService.getUserById(userId);
         if (user == null) {
-            return ApiResponse.failure(ErrorCode.LOGIN_FAIL,"用户不存在");
+            return ApiResponse.failure(StatusCode.LOGIN_FAIL,"用户不存在");
         }
         return ApiResponse.success(user);
     }
@@ -59,7 +59,7 @@ public class UserController {
     @GetMapping("/mongo/{id}")
     public ApiResponse<MongoUser> getMongoUserByUserId(@PathVariable(name = "id") int id) {
         MongoUser u = mongoUserService.getUserByUserId(id);
-        if (u == null) throw new BusinessException(ErrorCode.NOT_FOUND, "用户不存在");
+        if (u == null) throw new BusinessException(StatusCode.NOT_FOUND, "用户不存在");
         return ApiResponse.success(u);
     }
 
@@ -67,7 +67,7 @@ public class UserController {
     @PostMapping("/login")
     public ApiResponse<String> login(@RequestBody LoginRequest loginRequest, HttpServletRequest request) {
         String token = userService.login(loginRequest.getId(), loginRequest.getPassword(), request);
-        if (token == null || token.isEmpty()) throw new BusinessException(ErrorCode.LOGIN_FAIL, "账号或密码错误");
+        if (token == null || token.isEmpty()) throw new BusinessException(StatusCode.LOGIN_FAIL, "账号或密码错误");
         jedis.set(token, String.valueOf(loginRequest.getId()), 7 * 24 * 60 * 60);
         return ApiResponse.success(token);
     }
@@ -76,9 +76,9 @@ public class UserController {
     @PostMapping("/loginByEmail")
     public ApiResponse<String> loginByName(@RequestBody EmailLoginRequest emailLoginRequest, HttpServletRequest request) {
         User user = userService.getUserByEmail(emailLoginRequest.getEmail());
-        if (user == null) throw new BusinessException(ErrorCode.LOGIN_FAIL, "用户不存在");
+        if (user == null) throw new BusinessException(StatusCode.LOGIN_FAIL, "用户不存在");
         String token = userService.login(user.getId(), emailLoginRequest.getPassword(), request);
-        if (token == null || token.isEmpty()) throw new BusinessException(ErrorCode.LOGIN_FAIL, "账号或密码错误");
+        if (token == null || token.isEmpty()) throw new BusinessException(StatusCode.LOGIN_FAIL, "账号或密码错误");
         jedis.set(token, String.valueOf(user.getId()), 7 * 24 * 60 * 60);
         return ApiResponse.success(token);
     }
@@ -112,7 +112,7 @@ public class UserController {
         int id = user.getId() == 0 ? beforeId : user.getId();
         MongoUser mongoUser = new MongoUser(id, null, null);
         if(!mongoUserService.register(mongoUser)){
-            throw new BusinessException(ErrorCode.REGISTER_FAIL, "MongoDB register failed");
+            throw new BusinessException(StatusCode.REGISTER_FAIL, "MongoDB register failed");
         }
         return ApiResponse.success(id);
     }

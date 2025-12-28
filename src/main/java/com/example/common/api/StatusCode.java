@@ -1,7 +1,8 @@
 package com.example.common.api;
 
-public enum ErrorCode {
+public enum StatusCode {
     SUCCESS(0, "OK"),
+    PARTICIAL(206, "部分内容"),
     UNAUTHORIZED(401, "未授权"),
     VALIDATION_ERROR(1001, "参数校验失败"),
     AUTH_FAILED(1002, "认证失败"),
@@ -18,7 +19,7 @@ public enum ErrorCode {
     private final int code;
     private final String message;
 
-    ErrorCode(int code, String message) {
+    StatusCode(int code, String message) {
         this.code = code;
         this.message = message;
     }

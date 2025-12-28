@@ -2,7 +2,7 @@ package com.example.aspect;
 
 import com.example.annotation.RequireUserId;
 import com.example.common.api.ApiResponse;
-import com.example.common.api.ErrorCode;
+import com.example.common.api.StatusCode;
 import jakarta.servlet.http.HttpServletRequest;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -23,7 +23,7 @@ public class UserIdAspect {
     public Object checkUserId(ProceedingJoinPoint joinPoint, RequireUserId requireUserId) throws Throwable {
         Integer userId = (Integer) request.getAttribute("UserId");
         if (userId == null) {
-            return ApiResponse.failure(ErrorCode.LOGIN_FAIL,"用户未登录");
+            return ApiResponse.failure(StatusCode.LOGIN_FAIL,"用户未登录");
         }
         return joinPoint.proceed();
     }
