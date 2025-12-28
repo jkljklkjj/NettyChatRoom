@@ -2,7 +2,7 @@ server:
   port: 8088
 spring:
   datasource:
-    url: jdbc:mysql://${DB_HOST}:3306/chat
+    url: jdbc:mysql://${DB_HOST:127.0.0.1}:3306/chat
     username: root
     password: "123456"
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -13,7 +13,7 @@ spring:
       idle-timeout: 600000
   data:
     redis:
-      host: ${DB_HOST}
+      host: ${DB_HOST:127.0.0.1}
       port: 6379
       database: 2
       lettuce:
@@ -23,11 +23,11 @@ spring:
           max-idle: 8
           min-idle: 2
     mongodb:
-      host: ${DB_HOST}
+      host: ${DB_HOST:127.0.0.1}
       port: 27017
-      uri: mongodb://zhenye:123456@${DB_HOST}:27017/chat?authSource=chat&directConnection=true
+      uri: mongodb://zhenye:123456@${DB_HOST:127.0.0.1}:27017/chat?authSource=chat&directConnection=true
   kafka:
-    bootstrap-servers: ${DB_HOST}:9092
+    bootstrap-servers: ${DB_HOST:127.0.0.1}:9092
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
@@ -45,11 +45,4 @@ mybatis-plus:
 logging:
   level:
     org:
-#      springframework: Error
-#      apache:
-#        ibatis: DEBUG
-#      mybatis: DEBUG
         apache.kafka: warn
-#    com:
-#      example:
-#        mapper: debug
