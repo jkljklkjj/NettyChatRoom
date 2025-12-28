@@ -5,7 +5,7 @@ package com.example.constant;
  */
 public class KafkaConstant {
     /**
-     * 单聊离线消息主题前缀+用户账号即为Topic
+     * 异步入库的消息
      */
-    public static final String OFFLINE_MESSAGES = "offline-messages";
+    public static final String MESSAGES = "messages";
 }
