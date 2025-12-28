@@ -1,6 +1,6 @@
 package com.example.handler.MessageHandlerImpl;
 
-import com.example.config.KafkaProducer;
+import com.example.service.redis.RedisOfflineService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +29,7 @@ public class ChatHandler implements MessageHandler {
     private static final Logger logger = LoggerFactory.getLogger(ChatHandler.class);
 
     @Autowired
-    private KafkaProducer kafkaProducer;
+    private RedisOfflineService redisOfflineService;
 
     @Override
     public void handle(JSONObject jsonMsg, ChannelHandlerContext ctx) {
@@ -48,10 +48,11 @@ public class ChatHandler implements MessageHandler {
             // 发送消息
             sendMessage(ctx,targetChannel, content);
         } else {
-            // TODO 完成离线消息发送的测试
+            // 目标客户端不在线 -> 写入 Redis 离线队列并返回 OK
             System.out.println("目标客户端不在线");
-            kafkaProducer.sendMessage(targetClientId, content);
-            sendResponse(ctx, "该好友不在线", HttpResponseStatus.OK);
+            long ts = System.currentTimeMillis();
+            redisOfflineService.saveOfflineMessage(targetClientId, userId, content, ts);
+            sendResponse(ctx, "该好友不在线，已存离线消息", HttpResponseStatus.OK);
         }
     }
 

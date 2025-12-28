@@ -18,6 +18,12 @@ public class MessageService {
         messageMapper.insertMessage(message);
     }
 
+    @Transactional
+    public void insertMessages(java.util.List<Message> messages) {
+        if (messages == null || messages.isEmpty()) return;
+        messageMapper.insertMessages(messages);
+    }
+
     public List<Message> getOfflineMessages(String target, int limit) {
         return messageMapper.getOfflineMessages(target, limit);
     }

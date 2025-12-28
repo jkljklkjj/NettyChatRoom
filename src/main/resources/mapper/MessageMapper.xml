@@ -8,6 +8,14 @@
         VALUES (#{senderId}, #{receiverId}, #{message}, #{timestamp}, false)
     </insert>
 
+    <insert id="insertMessages" parameterType="java.util.List">
+        INSERT INTO messages (sender_id, receiver_id, message, timestamp, is_received)
+        VALUES
+        <foreach collection="messages" item="msg" separator=",">
+            (#{msg.senderId}, #{msg.receiverId}, #{msg.message}, #{msg.timestamp}, false)
+        </foreach>
+    </insert>
+
     <select id="getMessagesBySender" parameterType="string" resultType="com.example.model.mysql.Message">
         SELECT * FROM messages WHERE sender_id = #{sender}
     </select>

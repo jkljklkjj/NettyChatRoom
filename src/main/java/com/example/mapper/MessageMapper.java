@@ -11,6 +11,8 @@ public interface MessageMapper {
 
     void insertMessage(Message message);
 
+    void insertMessages(@Param("messages") List<Message> messages);
+
     List<Message> getOfflineMessages(@Param("target") String target, @Param("limit") int limit);
 
     void markMessagesAsReceived(@Param("ids") List<String> ids);
